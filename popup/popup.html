@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap');
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      width: 209px;
+      background: #000;
+      border-radius: 12px;
+      font-family: 'Fira Code', monospace;
+      color: #ccc;
+      overflow: hidden;
+    }
+    .titlebar {
+      height: 38px;
+      background: #0f0f0f;
+      border-bottom: 1px solid #2a2a2a;
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+    }
+    .titlebar-title { font-size: 11.6px; font-weight: 700; color: #eee; flex: 1; }
+    .titlebar-ver { font-size: 11.6px; color: #808080; }
+
+    .tabs {
+      height: 34px;
+      background: #0a0a0a;
+      border-bottom: 1px solid #2a2a2a;
+      display: flex;
+    }
+    .tab {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: #666;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      user-select: none;
+    }
+    .tab.active { color: #eee; border-bottom-color: #fff; }
+
+    .pane { display: none; padding: 10px; }
+    .pane.active { display: block; }
+
+    textarea {
+      width: 100%;
+      height: 180px;
+      background: #0d0d0d;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      color: #c9d1d9;
+      padding: 8px;
+      font-family: 'Fira Code', monospace;
+      font-size: 10px;
+      resize: none;
+      outline: none;
+      line-height: 1.5;
+    }
+    textarea:focus { border-color: #534ab7; }
+    .btn-row { display: flex; gap: 6px; margin-top: 8px; }
+    .btn {
+      flex: 1;
+      height: 29px;
+      background: #0d0d0d;
+      border: 1px solid #2a2a2a;
+      border-radius: 6px;
+      color: #fff;
+      font-family: 'Fira Code', monospace;
+      font-size: 9.2px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+    .btn:hover { border-color: #534ab7; }
+    .btn-apply { flex: 0 0 70px; }
+    .btn-save { flex: 1; }
+
+    .group { margin-bottom: 10px; }
+    .group-label {
+      font-size: 9px;
+      color: rgba(102,102,102,0.7);
+      margin-bottom: 5px;
+      text-transform: lowercase;
+    }
+    .chips { display: flex; flex-wrap: wrap; gap: 4px; }
+    .chip {
+      height: 22px;
+      padding: 0 9px;
+      border-radius: 11px;
+      border: 1px solid #2a2a2a;
+      background: #0a0a0a;
+      color: #666;
+      font-family: 'Fira Code', monospace;
+      font-size: 9px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      user-select: none;
+      transition: all .12s;
+    }
+    .chip:hover { border-color: #444; color: #999; }
+    .chip.on-global { background: #26215c; border-color: #534ab7; color: #a29de3; }
+    .chip.on-site   { background: #04342c; border-color: #1d9e75; color: #56bf86; }
+    .chip-add {
+      height: 22px;
+      padding: 0 9px;
+      border-radius: 11px;
+      border: 1px dashed #2a2a2a;
+      background: transparent;
+      color: #333;
+      font-family: 'Fira Code', monospace;
+      font-size: 9px;
+      cursor: pointer;
+    }
+    .chip-add:hover { color: #666; border-color: #444; }
+
+    .site-card {
+      background: #1a1a1a;
+      border: 1px solid #222;
+      border-radius: 10px;
+      margin-bottom: 6px;
+      overflow: hidden;
+    }
+    .site-card.active-card { background: #1c1a2e; border-color: #534ab7; }
+    .site-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+    }
+    .site-favicon {
+      width: 26px; height: 26px;
+      background: #222;
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden; flex-shrink: 0;
+    }
+    .site-favicon img { width: 16px; height: 16px; }
+    .site-info { flex: 1; min-width: 0; }
+    .site-domain { font-size: 12px; color: #eee; }
+    .site-meta { font-size: 10px; color: #444; margin-top: 1px; }
+    .site-toggle {
+      width: 32px; height: 18px;
+      background: #2a2a2a;
+      border-radius: 9px;
+      border: none;
+      position: relative;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background .15s;
+    }
+    .site-toggle.on { background: #534ab7; }
+    .site-toggle::after {
+      content: '';
+      position: absolute;
+      top: 3px; left: 3px;
+      width: 12px; height: 12px;
+      border-radius: 6px;
+      background: #fff;
+      transition: left .15s;
+    }
+    .site-toggle.on::after { left: 17px; }
+    .site-expand-btn {
+      margin: 0 8px 8px;
+      background: #111;
+      border: 1px solid #2a2a2a;
+      border-radius: 5px;
+      color: #555;
+      font-family: 'Fira Code', monospace;
+      font-size: 10px;
+      padding: 4px 8px;
+      cursor: pointer;
+      width: calc(100% - 16px);
+      text-align: left;
+    }
+    .site-expand-btn:hover { color: #999; border-color: #444; }
+    .site-presets { padding: 0 8px 8px; display: none; }
+    .site-presets.open { display: block; }
+    .preset-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 0;
+      border-top: 1px solid #1e1e1e;
+    }
+    .preset-dot {
+      width: 6px; height: 6px;
+      border-radius: 3px;
+      background: #333;
+      flex-shrink: 0;
+    }
+    .preset-dot.on { background: #534ab7; }
+    .preset-name { flex: 1; font-size: 10px; color: #eee; }
+    .preset-rules { font-size: 9px; color: #444; }
+    .preset-toggle-btn {
+      font-size: 9px;
+      padding: 2px 6px;
+      background: #111;
+      border: 1px solid #2a2a2a;
+      border-radius: 4px;
+      color: #555;
+      cursor: pointer;
+      font-family: 'Fira Code', monospace;
+    }
+    .preset-toggle-btn:hover { color: #ccc; border-color: #444; }
+
+    .search {
+      width: 100%;
+      background: #0d0d0d;
+      border: 1px solid #2a2a2a;
+      border-radius: 7px;
+      color: #ccc;
+      padding: 6px 8px;
+      font-family: 'Fira Code', monospace;
+      font-size: 10px;
+      outline: none;
+      margin-bottom: 8px;
+    }
+    .search:focus { border-color: #534ab7; }
+    .add-site-btn {
+      width: 100%;
+      background: #161616;
+      border: 1px dashed #222;
+      border-radius: 8px;
+      padding: 8px;
+      color: #333;
+      font-family: 'Fira Code', monospace;
+      font-size: 10px;
+      cursor: pointer;
+      margin-top: 4px;
+    }
+    .add-site-btn:hover { color: #666; border-color: #444; }
+  </style>
+</head>
+<body>
+  <div class="titlebar">
+    <span class="titlebar-title"># css editor</span>
+    <span class="titlebar-ver">v0.1</span>
+  </div>
+  <div class="tabs">
+    <div class="tab active" data-tab="editor">editor</div>
+    <div class="tab" data-tab="presets">presets</div>
+    <div class="tab" data-tab="sites">sites</div>
+  </div>
+
+  <div class="pane active" id="pane-editor">
+    <textarea id="css-input" placeholder="/* write your css here... */"></textarea>
+    <div class="btn-row">
+      <button class="btn btn-apply" id="btn-apply">▶ apply</button>
+      <button class="btn btn-save" id="btn-save">save as preset ↗</button>
+    </div>
+  </div>
+
+  <!-- PRESETS -->
+  <div class="pane" id="pane-presets">
+    <div id="presets-list"></div>
+  </div>
+
+  <!-- SITES -->
+  <div class="pane" id="pane-sites">
+    <input class="search" id="sites-search" placeholder="фильтр...">
+    <div id="sites-list"></div>
+    <button class="add-site-btn" id="btn-add-site">+ добавить сайт</button>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

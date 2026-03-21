@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>css editor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      width: 360px;
+      background: #000;
+      border-radius: 12px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #ccc;
+      overflow: hidden;
+    }
+
+    .titlebar {
+      height: 38px;
+      background: #0f0f0f;
+      border-bottom: 1px solid #2a2a2a;
+      display: flex; align-items: center; padding: 0 10px;
+    }
+    .titlebar-title { font-weight: 700; color: #eee; }
+    .titlebar-title span { color: #534ab7; }
+    .titlebar-ver { margin-left: auto; color: #555; font-size: 11px; }
+
+    .tabs {
+      height: 34px; background: #0a0a0a;
+      border-bottom: 1px solid #2a2a2a; display: flex;
+    }
+    .tab {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      color: #555; cursor: pointer; font-size: 11px;
+      border-bottom: 2px solid transparent; user-select: none;
+      transition: color .15s, border-color .15s;
+    }
+    .tab:hover:not(.active) { color: #888; }
+    .tab.active { color: #eee; border-bottom-color: #534ab7; }
+
+    .pane { display: none; padding: 10px; }
+    .pane.active { display: block; animation: paneIn .15s ease; }
+    @keyframes paneIn {
+      from { opacity: 0; transform: translateY(3px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .editor-wrap {
+      width: 100%; height: 280px;
+      background: #0d0d0d;
+      border: 1px solid #2a2a2a; border-radius: 8px;
+      overflow: hidden;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .editor-wrap:focus-within {
+      border-color: #534ab7;
+      box-shadow: 0 0 0 2px rgba(83,74,183,.15);
+    }
+    #css-input {
+      width: 100%; height: 100%;
+      background: transparent; border: none;
+      padding: 8px;
+      font-family: 'Fira Code', monospace;
+      font-size: 10px; line-height: 1.6;
+      color: #c9d1d9; caret-color: #c9d1d9;
+      resize: none; outline: none;
+      overflow: auto;
+      white-space: pre;
+      tab-size: 2; -moz-tab-size: 2;
+    }
+
+    .btn-row { display: flex; gap: 6px; margin-top: 8px; }
+    .btn {
+      flex: 1; height: 29px;
+      background: #0d0d0d; border: 1px solid #2a2a2a; border-radius: 6px;
+      color: #aaa; font-family: 'Fira Code', monospace; font-size: 9px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;
+      transition: border-color .15s, color .15s, transform .1s, background .15s;
+    }
+    .btn:hover { border-color: #534ab7; color: #a29de3; }
+    .btn:active { transform: scale(.96); background: #13103a; }
+
+    .group-label {
+      font-size: 9px; color: rgba(102,102,102,.7);
+      margin: 10px 0 5px; text-transform: lowercase;
+    }
+    .group-label:first-child { margin-top: 0; }
+    .chips { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 2px; }
+    .chip {
+      height: 22px; padding: 0 9px; border-radius: 11px;
+      border: 1px solid #2a2a2a; background: #0a0a0a; color: #555;
+      font-size: 9px; font-family: 'Fira Code', monospace;
+      cursor: pointer; display: flex; align-items: center;
+      transition: all .15s; white-space: nowrap;
+    }
+    .chip:hover { border-color: #444; color: #999; transform: translateY(-1px); }
+    .chip:active { transform: scale(.95); }
+    .chip.on-global { background: #26215c; border-color: #534ab7; color: #a29de3; }
+    .chip.on-site   { background: #04342c; border-color: #1d9e75; color: #56bf86; }
+    .chip-add {
+      height: 22px; padding: 0 8px; border-radius: 11px;
+      border: 1px dashed #2a2a2a; background: transparent; color: #333;
+      font-size: 11px; font-family: 'Fira Code', monospace;
+      cursor: pointer; display: flex; align-items: center;
+      transition: color .15s, border-color .15s;
+    }
+    .chip-add:hover { color: #666; border-color: #444; }
+
+    #presets-pane.active { max-height: 400px; overflow-y: auto; }
+
+    #sites-pane.active { max-height: 400px; overflow-y: auto; }
+
+    .search-wrap {
+      position: relative; margin-bottom: 8px;
+    }
+    .search-wrap::before {
+      content: '⌕';
+      position: absolute; left: 8px; top: 50%; transform: translateY(-50%);
+      color: #444; font-size: 13px; pointer-events: none;
+    }
+    .search {
+      width: 100%;
+      background: #0d0d0d; border: 1px solid #222; border-radius: 8px;
+      color: #ccc; padding: 6px 8px 6px 26px;
+      font-family: 'Fira Code', monospace; font-size: 10px;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .search:focus { border-color: #534ab7; box-shadow: 0 0 0 2px rgba(83,74,183,.15); }
+    .search::placeholder { color: #333; }
+
+    .site-card {
+      background: #111; border: 1px solid #1e1e1e;
+      border-radius: 10px; padding: 9px 10px; margin-bottom: 6px;
+      transition: border-color .2s, background .2s, box-shadow .2s;
+    }
+    .site-card:hover { border-color: #2a2a2a; }
+    .site-card.on { background: #1c1a2e; border-color: #534ab7; box-shadow: 0 0 0 1px rgba(83,74,183,.15); }
+    .site-top { display: flex; align-items: center; gap: 8px; }
+    .favicon {
+      width: 24px; height: 24px; background: #1a1a1a;
+      border-radius: 6px; display: flex; align-items: center;
+      justify-content: center; flex-shrink: 0; overflow: hidden;
+    }
+    .favicon img { width: 14px; height: 14px; }
+    .site-info { flex: 1; min-width: 0; }
+    .site-domain { font-size: 11px; color: #ddd; }
+    .site-meta { font-size: 9px; color: #3a3a3a; margin-top: 2px; }
+    .toggle {
+      width: 30px; height: 17px; background: #1e1e1e;
+      border-radius: 9px; border: none; position: relative;
+      cursor: pointer; flex-shrink: 0;
+      transition: background .2s, box-shadow .2s;
+    }
+    .toggle.on { background: #534ab7; box-shadow: 0 0 6px rgba(83,74,183,.4); }
+    .toggle::after {
+      content: ''; position: absolute;
+      top: 2px; left: 2px; width: 13px; height: 13px;
+      border-radius: 50%; background: #fff;
+      transition: left .2s cubic-bezier(.34,1.56,.64,1);
+    }
+    .toggle.on::after { left: 15px; }
+
+    .expand-btn {
+      background: none; border: none; color: #333;
+      font-size: 9px; font-family: 'Fira Code', monospace;
+      cursor: pointer; margin-top: 6px; padding: 0;
+      transition: color .15s;
+    }
+    .expand-btn:hover { color: #666; }
+
+    .preset-rows { margin-top: 7px; border-top: 1px solid #1e1e1e; padding-top: 5px; animation: paneIn .12s ease; }
+    .preset-row { display: flex; align-items: center; gap: 6px; padding: 3px 0; }
+    .preset-dot { width: 5px; height: 5px; border-radius: 50%; background: #534ab7; flex-shrink: 0; transition: background .2s; }
+    .preset-dot.off { background: #2a2a2a; }
+    .preset-name { flex: 1; font-size: 10px; color: #ccc; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .preset-rules { font-size: 9px; color: #333; }
+    .preset-toggle-btn {
+      font-size: 9px; font-family: 'Fira Code', monospace;
+      padding: 2px 6px; border-radius: 4px;
+      border: 1px solid #222; background: #0d0d0d;
+      cursor: pointer; color: #444;
+      transition: color .15s, border-color .15s, background .15s;
+    }
+    .preset-toggle-btn:hover { color: #999; border-color: #444; }
+    .preset-toggle-btn.on { color: #56bf86; border-color: #1d9e75; background: #04342c; }
+
+    .chip-x {
+      margin-left: 4px;
+      color: rgba(255,255,255,.2);
+      font-size: 11px;
+      line-height: 1;
+      cursor: pointer;
+      transition: color .15s;
+    }
+    .chip:hover .chip-x { color: rgba(255,255,255,.5); }
+    .chip-x:hover { color: #e06c75 !important; }
+
+    .site-del {
+      background: none; border: none;
+      color: #2a2a2a; font-size: 14px; line-height: 1;
+      cursor: pointer; padding: 0 2px; margin-left: 2px;
+      transition: color .15s;
+      flex-shrink: 0;
+    }
+    .site-del:hover { color: #e06c75; }
+
+    .empty { font-size: 10px; color: #2a2a2a; text-align: center; padding: 20px 0; }
+
+    @keyframes titlePulse {
+      0%,100% { color: #eee; }
+      50%      { color: #a29de3; }
+    }
+    .title-saved { animation: titlePulse .5s ease; }
+  </style>
+</head>
+<body>
+  <div class="titlebar">
+    <span class="titlebar-title"><span>#</span> css editor</span>
+    <span class="titlebar-ver">v0.1</span>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="editor">editor</div>
+    <div class="tab" data-tab="presets">presets</div>
+    <div class="tab" data-tab="sites">sites</div>
+  </div>
+
+  <div class="pane active" id="editor-pane">
+    <div class="editor-wrap">
+      <textarea id="css-input" placeholder="/* write your css here... */" spellcheck="false"></textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn" id="btn-format">⌥ format</button>
+      <button class="btn" id="btn-save-preset">save as preset ↗</button>
+    </div>
+  </div>
+
+  <div class="pane" id="presets-pane">
+    <div id="presets-content"></div>
+  </div>
+
+  <div class="pane" id="sites-pane">
+    <div class="search-wrap">
+      <input class="search" id="sites-search" placeholder="filter sites...">
+    </div>
+    <div id="sites-content"></div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
