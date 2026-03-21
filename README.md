@@ -85,48 +85,6 @@ To build your own version from source:
 
 ---
 
-### 🖼️ Logo
-
-To set a custom icon for the extension:
-
-1. Prepare two PNG files: `icon48.png` (48×48px) and `icon96.png` (96×96px)
-2. Replace the files in the `icons/` folder
-3. Repackage into `.xpi` and reinstall
-
-The icons are referenced in `manifest.json` under `browser_action.default_icon` — you can add that key if you want the toolbar button to show your icon:
-
-```json
-"browser_action": {
-  "default_popup": "popup/index.html",
-  "default_title": "css editor",
-  "default_icon": {
-    "48": "icons/icon48.png",
-    "96": "icons/icon96.png"
-  }
-}
-```
-
----
-
-### 🏪 Publishing to Firefox Add-ons (AMO)
-
-1. **Create an account** at [addons.mozilla.org](https://addons.mozilla.org/developers/)
-2. Go to **Submit a New Add-on** → choose **On this site** (listed) or **On your own** (unlisted/self-hosted)
-3. Upload your `.xpi` file
-4. Mozilla will **auto-review** the submission — most extensions are reviewed within a few days
-5. Fill in the listing details: name, description, screenshots, category
-6. Once approved, your extension gets a public AMO page and can be installed by anyone without disabling signature checks
-
-> **Signing:** AMO automatically signs your `.xpi`. Signed `.xpi` files work in all Firefox builds including stable — no `about:config` changes needed for users.
-
-For automated signing without a full AMO listing, use the [web-ext](https://github.com/mozilla/web-ext) CLI tool:
-```bash
-npm install -g web-ext
-web-ext sign --api-key=... --api-secret=...
-```
-
----
-
 ### 📁 Project Structure
 
 ```
