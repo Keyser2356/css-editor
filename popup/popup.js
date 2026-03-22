@@ -3,7 +3,7 @@ let db = {};
 
 (async () => {
   const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
-  try { currentDomain = new URL(tab.url).hostname; } catch {}
+  try { currentDomain = new URL(tab.url).hostname.replace(/^www\./, ''); } catch {}
   db = await browser.storage.local.get(null);
   setupTabs();
   setupEditor();
@@ -15,14 +15,17 @@ function save(updates) {
   Object.assign(db, updates);
   return browser.storage.local.set(updates);
 }
+
 function allPresets() {
   return Object.entries(db)
     .filter(([k]) => k.startsWith('preset:'))
     .map(([, v]) => v);
 }
+
 function siteData(domain) {
   return db[`site:${domain}`] || { enabled: false, activePresets: [] };
 }
+
 function genId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
 }
@@ -93,8 +96,8 @@ function setupEditor() {
   const ta = document.getElementById('css-input');
 
   ta.value = db[`draft:${currentDomain}`] || '';
-
   ta.scrollTop = db[`scroll:${currentDomain}`] || 0;
+
   let scrollDebounce;
   ta.addEventListener('scroll', () => {
     clearTimeout(scrollDebounce);
@@ -146,11 +149,12 @@ function setupEditor() {
     const name = prompt('Preset name:');
     if (!name) return;
     const id = genId();
-    await save({ [`preset:${id}`]: { id, name, css, type: 'site', domain: currentDomain } });
-    const site = siteData(currentDomain);
+    const domain = currentDomain.replace(/^www\./, '');
+    await save({ [`preset:${id}`]: { id, name, css, type: 'site', domain } });
+    const site = siteData(domain);
     site.activePresets = [...new Set([...(site.activePresets || []), id])];
     site.enabled = true;
-    await save({ [`site:${currentDomain}`]: site });
+    await save({ [`site:${domain}`]: site });
     db = await browser.storage.local.get(null);
     renderPresets();
     renderSites();
@@ -231,7 +235,6 @@ function renderPresets() {
       if (!confirm('Delete preset?')) return;
       await browser.storage.local.remove(`preset:${id}`);
       delete db[`preset:${id}`];
-      // remove from all sites
       const updates = {};
       Object.keys(db).filter(k => k.startsWith('site:')).forEach(k => {
         const s = db[k];
@@ -283,11 +286,14 @@ function renderSites() {
   let html = '';
   filtered.forEach(domain => {
     const site = siteData(domain);
-    const domainPresets = allPresets().filter(p => p.domain === domain || p.type === 'global');
     const activeSet = new Set(site.activePresets || []);
-    const ruleCount = domainPresets.reduce((a, p) =>
+    // presets available for this domain (domain-specific + global)
+    const domainPresets = allPresets().filter(p => p.domain === domain || p.type === 'global');
+    // only count active ones for the meta line
+    const activePresets = domainPresets.filter(p => activeSet.has(p.id));
+    const ruleCount = activePresets.reduce((a, p) =>
       a + (p.css || '').split('\n').filter(l => l.trim() && !l.trim().startsWith('/')).length, 0);
-    const meta = `${domainPresets.length} preset${domainPresets.length !== 1 ? 's' : ''} · ${ruleCount} rules`;
+    const meta = `${activePresets.length} preset${activePresets.length !== 1 ? 's' : ''} · ${ruleCount} rules`;
 
     html += `<div class="site-card ${site.enabled ? 'on' : ''}" data-domain="${domain}">
       <div class="site-top">

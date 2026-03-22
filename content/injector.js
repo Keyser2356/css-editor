@@ -3,14 +3,32 @@ if (!window.__cssEditorInit) {
 
   const STYLE_ID = 'css-editor-injected';
 
+  function normalizeDomain(h) {
+    return h.replace(/^www\./, '');
+  }
+
+  function addImportant(css) {
+    // Add !important to every property value, skip comments and @rules lines
+    return css.replace(
+      /([^{}:\/\*]+):([^;{}]+)(;)/g,
+      (match, prop, val, semi) => {
+        const trimVal = val.trim();
+        if (trimVal.endsWith('!important')) return match;
+        return `${prop}:${val} !important${semi}`;
+      }
+    );
+  }
+
   function applyCSS(css) {
     let el = document.getElementById(STYLE_ID);
     if (!el) {
       el = document.createElement('style');
       el.id = STYLE_ID;
-      (document.head || document.documentElement).appendChild(el);
     }
-    el.textContent = css || '';
+    el.textContent = css ? addImportant(css) : '';
+    // Always move to end of head — last stylesheet wins on equal specificity
+    const parent = document.head || document.documentElement;
+    parent.appendChild(el);
   }
 
   browser.runtime.onMessage.addListener((msg) => {
@@ -22,7 +40,7 @@ if (!window.__cssEditorInit) {
   });
 
   (async () => {
-    const domain = location.hostname;
+    const domain = normalizeDomain(location.hostname);
     const storage = await browser.storage.local.get(null);
     const site = storage[`site:${domain}`] || {};
     const parts = [];
