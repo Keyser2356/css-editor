@@ -1,4 +1,3 @@
-<p align="center">
   <h1 align="center">CSS Editor</h1>
   <p align="center">
     <b>"Your browser, your rules."</b><br>
@@ -37,6 +36,9 @@ A minimal popup-based CSS injector that lets you style any website on the fly. C
 - **Format on Paste/Blur:** CSS is auto-formatted when you paste or leave the editor.
 - **Scroll Memory:** Editor remembers your scroll position per domain.
 - **Delete Presets & Sites:** Remove entries with the × button.
+![waterfox_AziBP1h776](https://github.com/user-attachments/assets/eab8eee2-f015-4f7f-933e-3bbec81c5df2)
+
+
 
 ---
 
