@@ -49,7 +49,6 @@ async function injectToTab(css) {
   }
 }
 
-// ── Tabs ─────────────────────────────────────────────────
 function setupTabs() {
   document.querySelectorAll('.tab').forEach(tab => {
     tab.addEventListener('click', () => {
@@ -61,7 +60,6 @@ function setupTabs() {
   });
 }
 
-// ── CSS Formatter ────────────────────────────────────────
 function formatCSS(css) {
   let out = '', indent = 0;
   const IND = '  ';
@@ -79,7 +77,6 @@ function formatCSS(css) {
   return out.replace(/\n{3,}/g, '\n\n').trim();
 }
 
-// ── History (undo/redo) ──────────────────────────────────
 const MAX_HISTORY = 100;
 
 function getHistory() {
@@ -109,7 +106,6 @@ function redoHistory() {
   return h.stack[h.pos];
 }
 
-// ── Line numbers ─────────────────────────────────────────
 function updateLineNumbers(ta) {
   const lines = ta.value.split('\n').length;
   const gutter = document.getElementById('line-numbers');
@@ -127,7 +123,6 @@ function updateLineNumbers(ta) {
   gutter.scrollTop = ta.scrollTop;
 }
 
-// ── Editor ───────────────────────────────────────────────
 function setupEditor() {
   const ta = document.getElementById('css-input');
 
@@ -135,7 +130,6 @@ function setupEditor() {
   ta.scrollTop = db[`scroll:${currentDomain}`] || 0;
   updateLineNumbers(ta);
 
-  // Push initial state to history if empty
   if (!getHistory().stack.length && ta.value) pushHistory(ta.value);
 
   let scrollDebounce;
@@ -227,7 +221,6 @@ function setupEditor() {
       const site = siteData(domain);
       site.activePresets = [...new Set([...(site.activePresets || []), id])];
       site.enabled = true;
-      // Clear draft — CSS is now in a preset, draft should be empty
       await save({ [`site:${domain}`]: site, [`draft:${domain}`]: '' });
       ta.value = '';
       updateLineNumbers(ta);
@@ -243,7 +236,6 @@ function setupEditor() {
   });
 }
 
-// ── Presets ──────────────────────────────────────────────
 function renderPresets() {
   const container = document.getElementById('presets-content');
   const presets = allPresets();
