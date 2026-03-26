@@ -8,7 +8,6 @@ if (!window.__cssEditorInit) {
   }
 
   function addImportant(css) {
-    // Add !important to every property value, skip comments and @rules lines
     return css.replace(
       /([^{}:\/\*]+):([^;{}]+)(;)/g,
       (match, prop, val, semi) => {
@@ -26,7 +25,6 @@ if (!window.__cssEditorInit) {
       el.id = STYLE_ID;
     }
     el.textContent = css ? addImportant(css) : '';
-    // Always move to end of head — last stylesheet wins on equal specificity
     const parent = document.head || document.documentElement;
     parent.appendChild(el);
   }
