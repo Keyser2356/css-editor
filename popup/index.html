@@ -22,11 +22,28 @@
       height: 38px;
       background: #0f0f0f;
       border-bottom: 1px solid #2a2a2a;
-      display: flex; align-items: center; padding: 0 10px;
+      display: flex; align-items: center; padding: 0 10px; gap: 8px;
     }
-    .titlebar-title { font-weight: 700; color: #eee; }
+    .titlebar-title { font-weight: 700; color: #eee; flex: 1; }
     .titlebar-title span { color: #534ab7; }
-    .titlebar-ver { margin-left: auto; color: #555; font-size: 11px; }
+    .titlebar-ver { color: #333; font-size: 11px; }
+
+    /* Global kill switch */
+    .global-toggle {
+      width: 22px; height: 22px;
+      border-radius: 5px;
+      background: #0d0d0d;
+      border: 1px solid #2a2a2a;
+      color: #534ab7;
+      font-size: 11px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .15s;
+      flex-shrink: 0;
+    }
+    .global-toggle:hover { border-color: #534ab7; }
+    .global-toggle.off { background: #2a0a0a; border-color: #7a2020; color: #e05555; }
+    .global-toggle.off:hover { border-color: #e05555; }
 
     .tabs {
       height: 34px; background: #0a0a0a;
@@ -48,8 +65,9 @@
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* ── Editor ── */
+    /* ── Editor with line numbers ── */
     .editor-wrap {
+      display: flex;
       width: 100%; height: 280px;
       background: #0d0d0d;
       border: 1px solid #2a2a2a; border-radius: 8px;
@@ -60,8 +78,23 @@
       border-color: #534ab7;
       box-shadow: 0 0 0 2px rgba(83,74,183,.15);
     }
+    #line-numbers {
+      width: 32px;
+      min-width: 32px;
+      background: #0a0a0a;
+      border-right: 1px solid #1e1e1e;
+      padding: 8px 0;
+      text-align: right;
+      font-size: 9px;
+      line-height: 1.6;
+      color: #333;
+      overflow: hidden;
+      user-select: none;
+      flex-shrink: 0;
+    }
+    #line-numbers div { padding-right: 6px; }
     #css-input {
-      width: 100%; height: 100%;
+      flex: 1;
       background: transparent; border: none;
       padding: 8px;
       font-family: 'Fira Code', monospace;
@@ -102,6 +135,18 @@
     .chip:active { transform: scale(.95); }
     .chip.on-global { background: #26215c; border-color: #534ab7; color: #a29de3; }
     .chip.on-site   { background: #04342c; border-color: #1d9e75; color: #56bf86; }
+    .chip-edit {
+      margin-left: 5px; color: rgba(255,255,255,.12);
+      font-size: 10px; cursor: pointer; transition: color .15s;
+    }
+    .chip:hover .chip-edit { color: rgba(255,255,255,.4); }
+    .chip-edit:hover { color: #a29de3 !important; }
+    .chip-x {
+      margin-left: 4px; color: rgba(255,255,255,.15);
+      font-size: 11px; cursor: pointer; transition: color .15s;
+    }
+    .chip:hover .chip-x { color: rgba(255,255,255,.4); }
+    .chip-x:hover { color: #e06c75 !important; }
     .chip-add {
       height: 22px; padding: 0 8px; border-radius: 11px;
       border: 1px dashed #2a2a2a; background: transparent; color: #333;
@@ -116,21 +161,15 @@
     /* ── Sites ── */
     #sites-pane.active { max-height: 400px; overflow-y: auto; }
 
-    /* search */
-    .search-wrap {
-      position: relative; margin-bottom: 8px;
-    }
+    .search-wrap { position: relative; margin-bottom: 8px; }
     .search-wrap::before {
-      content: '⌕';
-      position: absolute; left: 8px; top: 50%; transform: translateY(-50%);
-      color: #444; font-size: 13px; pointer-events: none;
+      content: '⌕'; position: absolute; left: 8px; top: 50%;
+      transform: translateY(-50%); color: #444; font-size: 13px; pointer-events: none;
     }
     .search {
-      width: 100%;
-      background: #0d0d0d; border: 1px solid #222; border-radius: 8px;
+      width: 100%; background: #0d0d0d; border: 1px solid #222; border-radius: 8px;
       color: #ccc; padding: 6px 8px 6px 26px;
-      font-family: 'Fira Code', monospace; font-size: 10px;
-      outline: none;
+      font-family: 'Fira Code', monospace; font-size: 10px; outline: none;
       transition: border-color .2s, box-shadow .2s;
     }
     .search:focus { border-color: #534ab7; box-shadow: 0 0 0 2px rgba(83,74,183,.15); }
@@ -167,15 +206,12 @@
       transition: left .2s cubic-bezier(.34,1.56,.64,1);
     }
     .toggle.on::after { left: 15px; }
-
     .expand-btn {
       background: none; border: none; color: #333;
       font-size: 9px; font-family: 'Fira Code', monospace;
-      cursor: pointer; margin-top: 6px; padding: 0;
-      transition: color .15s;
+      cursor: pointer; margin-top: 6px; padding: 0; transition: color .15s;
     }
     .expand-btn:hover { color: #666; }
-
     .preset-rows { margin-top: 7px; border-top: 1px solid #1e1e1e; padding-top: 5px; animation: paneIn .12s ease; }
     .preset-row { display: flex; align-items: center; gap: 6px; padding: 3px 0; }
     .preset-dot { width: 5px; height: 5px; border-radius: 50%; background: #534ab7; flex-shrink: 0; transition: background .2s; }
@@ -191,24 +227,10 @@
     }
     .preset-toggle-btn:hover { color: #999; border-color: #444; }
     .preset-toggle-btn.on { color: #56bf86; border-color: #1d9e75; background: #04342c; }
-
-    .chip-x {
-      margin-left: 4px;
-      color: rgba(255,255,255,.2);
-      font-size: 11px;
-      line-height: 1;
-      cursor: pointer;
-      transition: color .15s;
-    }
-    .chip:hover .chip-x { color: rgba(255,255,255,.5); }
-    .chip-x:hover { color: #e06c75 !important; }
-
     .site-del {
-      background: none; border: none;
-      color: #2a2a2a; font-size: 14px; line-height: 1;
-      cursor: pointer; padding: 0 2px; margin-left: 2px;
-      transition: color .15s;
-      flex-shrink: 0;
+      background: none; border: none; color: #2a2a2a;
+      font-size: 14px; cursor: pointer; padding: 0 2px;
+      transition: color .15s; flex-shrink: 0;
     }
     .site-del:hover { color: #e06c75; }
 
@@ -224,7 +246,7 @@
 <body>
   <div class="titlebar">
     <span class="titlebar-title"><span>#</span> css editor</span>
-    <span class="titlebar-ver">v0.1</span>
+    <span class="titlebar-ver">v0.2</span>
   </div>
 
   <div class="tabs">
@@ -235,6 +257,7 @@
 
   <div class="pane active" id="editor-pane">
     <div class="editor-wrap">
+      <div id="line-numbers"><div>1</div></div>
       <textarea id="css-input" placeholder="/* write your css here... */" spellcheck="false"></textarea>
     </div>
     <div class="btn-row">

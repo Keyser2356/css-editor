@@ -55,6 +55,7 @@ if (!window.__cssEditorInit) {
     const draft = storage[`draft:${domain}`];
     if (draft && draft.trim()) parts.push(draft);
 
+    if (storage['global:disabled']) return;
     if (parts.length) applyCSS(parts.join('\n'));
   })();
 }
