@@ -65,12 +65,12 @@ function setupTabs() {
       document.getElementById(`${tab.dataset.tab}-pane`).classList.add('active');
     });
   });
-  document.getElementById('btn-settings').addEventListener('click', () => {
+  /* document.getElementById('btn-settings').addEventListener('click', () => {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
     document.querySelector('[data-tab="settings"]').classList.add('active');
     document.getElementById('settings-pane').classList.add('active');
-  });
+  }); */
 }
 
 // ── CSS Syntax Highlighter ────────────────────────────────
