@@ -7,122 +7,150 @@
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
-      width: 360px;
-      background: #000;
-      border-radius: 12px;
-      font-family: 'Fira Code', monospace;
-      font-size: 12px;
-      color: #ccc;
-      overflow: hidden;
+      width: 360px; background: #000; border-radius: 12px;
+      font-family: 'Fira Code', monospace; font-size: 12px; color: #ccc; overflow: hidden;
     }
-
     .titlebar {
-      height: 38px;
-      background: #0f0f0f;
-      border-bottom: 1px solid #2a2a2a;
-      display: flex; align-items: center; padding: 0 10px; gap: 8px;
+      height: 38px; background: #0f0f0f; border-bottom: 1px solid #2a2a2a;
+      display: flex; align-items: center; padding: 0 10px; gap: 6px;
     }
     .titlebar-title { font-weight: 700; color: #eee; flex: 1; }
     .titlebar-title span { color: #534ab7; }
     .titlebar-ver { color: #333; font-size: 11px; }
-
-    .global-toggle {
-      width: 22px; height: 22px;
-      border-radius: 5px;
-      background: #0d0d0d;
-      border: 1px solid #2a2a2a;
-      color: #534ab7;
-      font-size: 11px;
-      cursor: pointer;
+    .titlebar-icon {
+      width: 22px; height: 22px; border-radius: 5px;
+      background: #0d0d0d; border: 1px solid #2a2a2a;
+      color: #555; font-size: 12px; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
-      transition: all .15s;
-      flex-shrink: 0;
+      transition: all .15s; flex-shrink: 0;
     }
-    .global-toggle:hover { border-color: #534ab7; }
-    .global-toggle.off { background: #2a0a0a; border-color: #7a2020; color: #e05555; }
-    .global-toggle.off:hover { border-color: #e05555; }
+    .titlebar-icon:hover { border-color: #534ab7; color: #a29de3; }
 
-    .tabs {
-      height: 34px; background: #0a0a0a;
-      border-bottom: 1px solid #2a2a2a; display: flex;
-    }
+    .tabs { height: 34px; background: #0a0a0a; border-bottom: 1px solid #2a2a2a; display: flex; }
     .tab {
       flex: 1; display: flex; align-items: center; justify-content: center;
       color: #555; cursor: pointer; font-size: 11px;
-      border-bottom: 2px solid transparent; user-select: none;
-      transition: color .15s, border-color .15s;
+      border-bottom: 2px solid transparent; user-select: none; transition: color .15s, border-color .15s;
     }
     .tab:hover:not(.active) { color: #888; }
     .tab.active { color: #eee; border-bottom-color: #534ab7; }
 
     .pane { display: none; padding: 10px; }
     .pane.active { display: block; animation: paneIn .15s ease; }
-    @keyframes paneIn {
-      from { opacity: 0; transform: translateY(3px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
+    @keyframes paneIn { from { opacity:0; transform:translateY(3px); } to { opacity:1; transform:translateY(0); } }
 
+    /* ── Editor with highlight overlay ── */
     .editor-wrap {
-      display: flex;
-      width: 100%; height: 280px;
-      background: #0d0d0d;
-      border: 1px solid #2a2a2a; border-radius: 8px;
-      overflow: hidden;
-      transition: border-color .2s, box-shadow .2s;
+      display: flex; width: 100%; height: 260px;
+      background: #0d0d0d; border: 1px solid #2a2a2a; border-radius: 8px;
+      overflow: hidden; transition: border-color .2s, box-shadow .2s; position: relative;
     }
-    .editor-wrap:focus-within {
-      border-color: #534ab7;
-      box-shadow: 0 0 0 2px rgba(83,74,183,.15);
-    }
+    .editor-wrap:focus-within { border-color: #534ab7; box-shadow: 0 0 0 2px rgba(83,74,183,.15); }
     #line-numbers {
-      width: 32px;
-      min-width: 32px;
-      background: #0a0a0a;
-      border-right: 1px solid #1e1e1e;
-      padding: 8px 0;
-      text-align: right;
-      font-size: 9px;
-      line-height: 1.6;
-      color: #333;
-      overflow: hidden;
-      user-select: none;
-      flex-shrink: 0;
+      width: 32px; min-width: 32px; background: #0a0a0a;
+      border-right: 1px solid #1e1e1e; padding: 8px 0;
+      text-align: right; font-size: 9px; line-height: 1.6; color: #2a2a2a;
+      overflow: hidden; user-select: none; flex-shrink: 0;
     }
     #line-numbers div { padding-right: 6px; }
-    #css-input {
-      flex: 1;
-      background: transparent; border: none;
-      padding: 8px;
-      font-family: 'Fira Code', monospace;
-      font-size: 10px; line-height: 1.6;
-      color: #c9d1d9; caret-color: #c9d1d9;
-      resize: none; outline: none;
-      overflow: auto;
-      white-space: pre;
-      tab-size: 2; -moz-tab-size: 2;
+    .editor-inner { position: relative; flex: 1; overflow: hidden; }
+    /* highlight layer */
+    #css-highlight {
+      position: absolute; inset: 0; padding: 8px;
+      font-family: 'Fira Code', monospace; font-size: 10px; line-height: 1.6;
+      white-space: pre; overflow: hidden; pointer-events: none;
+      word-break: normal; tab-size: 2;
+      /* must match textarea exactly so text aligns */
+      margin: 0; border: none;
     }
+    /* textarea on top */
+    #css-input {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      background: transparent; border: none; padding: 8px;
+      font-family: 'Fira Code', monospace; font-size: 10px; line-height: 1.6;
+      color: transparent; caret-color: #c9d1d9;
+      resize: none; outline: none; overflow: auto;
+      white-space: pre; tab-size: 2; z-index: 1;
+      /* selection must be visible through transparent text */
+    }
+    #css-input::selection { background: rgba(83,74,183,.4); color: transparent; }
+    #css-input::-moz-selection { background: rgba(83,74,183,.4); color: transparent; }
+    /* syntax */
+    .hl-sel  { color: #e06c75; }
+    .hl-prop { color: #79b8ff; }
+    .hl-val  { color: #98c379; }
+    .hl-punc { color: #444; }
+    .hl-at   { color: #c678dd; }
+    .hl-com  { color: #3a3a3a; font-style: italic; }
+    .hl-num  { color: #d19a66; }
+    .hl-str  { color: #98c379; }
+    .hl-imp  { color: #e06c75; }
 
-    .btn-row { display: flex; gap: 6px; margin-top: 8px; }
+    .btn-row { display: flex; gap: 5px; margin-top: 8px; }
     .btn {
-      flex: 1; height: 29px;
-      background: #0d0d0d; border: 1px solid #2a2a2a; border-radius: 6px;
-      color: #aaa; font-family: 'Fira Code', monospace; font-size: 9px;
-      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;
+      flex: 1; height: 28px; background: #0d0d0d; border: 1px solid #2a2a2a; border-radius: 6px;
+      color: #777; font-family: 'Fira Code', monospace; font-size: 9px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 3px;
       transition: border-color .15s, color .15s, transform .1s, background .15s;
     }
     .btn:hover { border-color: #534ab7; color: #a29de3; }
     .btn:active { transform: scale(.96); background: #13103a; }
+    .btn-icon { font-size: 11px; }
 
-    .group-label {
-      font-size: 9px; color: rgba(102,102,102,.7);
-      margin: 10px 0 5px; text-transform: lowercase;
+    /* ── Settings pane ── */
+    .settings-group { margin-bottom: 16px; }
+    .settings-label { font-size: 9px; color: rgba(102,102,102,.7); margin-bottom: 6px; text-transform: lowercase; }
+    .settings-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 7px 0; border-bottom: 1px solid #111;
     }
+    .settings-row:last-child { border-bottom: none; }
+    .settings-row-label { font-size: 10px; color: #888; }
+    .settings-row-sub { font-size: 9px; color: #444; margin-top: 1px; }
+    .toggle-sm {
+      width: 28px; height: 16px; background: #1e1e1e;
+      border-radius: 8px; border: none; position: relative;
+      cursor: pointer; flex-shrink: 0; transition: background .2s;
+    }
+    .toggle-sm.on { background: #534ab7; }
+    .toggle-sm::after {
+      content: ''; position: absolute; top: 2px; left: 2px;
+      width: 12px; height: 12px; border-radius: 50%; background: #fff;
+      transition: left .2s cubic-bezier(.34,1.56,.64,1);
+    }
+    .toggle-sm.on::after { left: 14px; }
+    .settings-btn {
+      padding: 4px 10px; border-radius: 4px; font-size: 9px;
+      font-family: 'Fira Code', monospace; background: #0d0d0d;
+      border: 1px solid #2a2a2a; color: #555; cursor: pointer;
+      transition: all .15s;
+    }
+    .settings-btn:hover { border-color: #534ab7; color: #a29de3; }
+    .settings-btn.danger:hover { border-color: #e05555; color: #e05555; }
+    .share-result {
+      margin-top: 8px; padding: 6px 8px; background: #0d0d0d;
+      border: 1px solid #2a2a2a; border-radius: 5px;
+      font-size: 9px; color: #56bf86; word-break: break-all; display: none;
+    }
+    .share-result.show { display: block; }
+    .import-wrap { margin-top: 6px; }
+    .import-input {
+      display: none;
+    }
+    .import-label {
+      display: flex; align-items: center; justify-content: center;
+      width: 100%; padding: 8px; border: 1px dashed #2a2a2a; border-radius: 6px;
+      font-size: 9px; color: #444; cursor: pointer; transition: all .15s;
+    }
+    .import-label:hover { border-color: #534ab7; color: #a29de3; }
+
+    /* ── Presets ── */
+    .group-label { font-size: 9px; color: rgba(102,102,102,.7); margin: 10px 0 5px; text-transform: lowercase; }
     .group-label:first-child { margin-top: 0; }
     .chips { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 2px; }
     .chip {
-      height: 22px; padding: 0 9px; border-radius: 11px;
+      height: 22px; padding: 0 8px; border-radius: 11px;
       border: 1px solid #2a2a2a; background: #0a0a0a; color: #555;
       font-size: 9px; font-family: 'Fira Code', monospace;
       cursor: pointer; display: flex; align-items: center;
@@ -132,17 +160,11 @@
     .chip:active { transform: scale(.95); }
     .chip.on-global { background: #26215c; border-color: #534ab7; color: #a29de3; }
     .chip.on-site   { background: #04342c; border-color: #1d9e75; color: #56bf86; }
-    .chip-edit {
-      margin-left: 5px; color: rgba(255,255,255,.12);
-      font-size: 10px; cursor: pointer; transition: color .15s;
-    }
-    .chip:hover .chip-edit { color: rgba(255,255,255,.4); }
+    .chip-edit { margin-left: 4px; color: rgba(255,255,255,.1); font-size: 10px; cursor: pointer; transition: color .15s; }
+    .chip:hover .chip-edit { color: rgba(255,255,255,.35); }
     .chip-edit:hover { color: #a29de3 !important; }
-    .chip-x {
-      margin-left: 4px; color: rgba(255,255,255,.15);
-      font-size: 11px; cursor: pointer; transition: color .15s;
-    }
-    .chip:hover .chip-x { color: rgba(255,255,255,.4); }
+    .chip-x { margin-left: 3px; color: rgba(255,255,255,.12); font-size: 11px; cursor: pointer; transition: color .15s; }
+    .chip:hover .chip-x { color: rgba(255,255,255,.35); }
     .chip-x:hover { color: #e06c75 !important; }
     .chip-add {
       height: 22px; padding: 0 8px; border-radius: 11px;
@@ -152,16 +174,12 @@
       transition: color .15s, border-color .15s;
     }
     .chip-add:hover { color: #666; border-color: #444; }
-
     #presets-pane.active { max-height: 400px; overflow-y: auto; }
 
+    /* ── Sites ── */
     #sites-pane.active { max-height: 400px; overflow-y: auto; }
-
     .search-wrap { position: relative; margin-bottom: 8px; }
-    .search-wrap::before {
-      content: '⌕'; position: absolute; left: 8px; top: 50%;
-      transform: translateY(-50%); color: #444; font-size: 13px; pointer-events: none;
-    }
+    .search-wrap::before { content:'⌕'; position:absolute; left:8px; top:50%; transform:translateY(-50%); color:#444; font-size:13px; pointer-events:none; }
     .search {
       width: 100%; background: #0d0d0d; border: 1px solid #222; border-radius: 8px;
       color: #ccc; padding: 6px 8px 6px 26px;
@@ -170,7 +188,6 @@
     }
     .search:focus { border-color: #534ab7; box-shadow: 0 0 0 2px rgba(83,74,183,.15); }
     .search::placeholder { color: #333; }
-
     .site-card {
       background: #111; border: 1px solid #1e1e1e;
       border-radius: 10px; padding: 9px 10px; margin-bottom: 6px;
@@ -179,98 +196,126 @@
     .site-card:hover { border-color: #2a2a2a; }
     .site-card.on { background: #1c1a2e; border-color: #534ab7; box-shadow: 0 0 0 1px rgba(83,74,183,.15); }
     .site-top { display: flex; align-items: center; gap: 8px; }
-    .favicon {
-      width: 24px; height: 24px; background: #1a1a1a;
-      border-radius: 6px; display: flex; align-items: center;
-      justify-content: center; flex-shrink: 0; overflow: hidden;
-    }
+    .favicon { width: 22px; height: 22px; background: #1a1a1a; border-radius: 5px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; }
     .favicon img { width: 14px; height: 14px; }
     .site-info { flex: 1; min-width: 0; }
     .site-domain { font-size: 11px; color: #ddd; }
-    .site-meta { font-size: 9px; color: #3a3a3a; margin-top: 2px; }
-    .toggle {
-      width: 30px; height: 17px; background: #1e1e1e;
-      border-radius: 9px; border: none; position: relative;
-      cursor: pointer; flex-shrink: 0;
-      transition: background .2s, box-shadow .2s;
-    }
-    .toggle.on { background: #534ab7; box-shadow: 0 0 6px rgba(83,74,183,.4); }
-    .toggle::after {
-      content: ''; position: absolute;
-      top: 2px; left: 2px; width: 13px; height: 13px;
-      border-radius: 50%; background: #fff;
-      transition: left .2s cubic-bezier(.34,1.56,.64,1);
-    }
-    .toggle.on::after { left: 15px; }
-    .expand-btn {
-      background: none; border: none; color: #333;
-      font-size: 9px; font-family: 'Fira Code', monospace;
-      cursor: pointer; margin-top: 6px; padding: 0; transition: color .15s;
-    }
+    .site-meta { font-size: 9px; color: #3a3a3a; margin-top: 1px; }
+    .toggle { width: 28px; height: 16px; background: #1e1e1e; border-radius: 8px; border: none; position: relative; cursor: pointer; flex-shrink: 0; transition: background .2s; }
+    .toggle.on { background: #534ab7; }
+    .toggle::after { content:''; position:absolute; top:2px; left:2px; width:12px; height:12px; border-radius:50%; background:#fff; transition:left .2s cubic-bezier(.34,1.56,.64,1); }
+    .toggle.on::after { left: 14px; }
+    .expand-btn { background:none; border:none; color:#333; font-size:9px; font-family:'Fira Code',monospace; cursor:pointer; margin-top:5px; padding:0; transition:color .15s; }
     .expand-btn:hover { color: #666; }
-    .preset-rows { margin-top: 7px; border-top: 1px solid #1e1e1e; padding-top: 5px; animation: paneIn .12s ease; }
-    .preset-row { display: flex; align-items: center; gap: 6px; padding: 3px 0; }
-    .preset-dot { width: 5px; height: 5px; border-radius: 50%; background: #534ab7; flex-shrink: 0; transition: background .2s; }
+    .preset-rows { margin-top:6px; border-top:1px solid #1e1e1e; padding-top:5px; animation:paneIn .12s ease; }
+    .preset-row { display:flex; align-items:center; gap:6px; padding:3px 0; }
+    .preset-dot { width:5px; height:5px; border-radius:50%; background:#534ab7; flex-shrink:0; transition:background .2s; }
     .preset-dot.off { background: #2a2a2a; }
-    .preset-name { flex: 1; font-size: 10px; color: #ccc; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .preset-rules { font-size: 9px; color: #333; }
-    .preset-toggle-btn {
-      font-size: 9px; font-family: 'Fira Code', monospace;
-      padding: 2px 6px; border-radius: 4px;
-      border: 1px solid #222; background: #0d0d0d;
-      cursor: pointer; color: #444;
-      transition: color .15s, border-color .15s, background .15s;
-    }
-    .preset-toggle-btn:hover { color: #999; border-color: #444; }
-    .preset-toggle-btn.on { color: #56bf86; border-color: #1d9e75; background: #04342c; }
-    .site-del {
-      background: none; border: none; color: #2a2a2a;
-      font-size: 14px; cursor: pointer; padding: 0 2px;
-      transition: color .15s; flex-shrink: 0;
-    }
+    .preset-name { flex:1; font-size:10px; color:#ccc; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .preset-rules { font-size:9px; color:#333; }
+    .preset-toggle-btn { font-size:9px; font-family:'Fira Code',monospace; padding:2px 6px; border-radius:4px; border:1px solid #222; background:#0d0d0d; cursor:pointer; color:#444; transition:color .15s,border-color .15s,background .15s; }
+    .preset-toggle-btn:hover { color:#999; border-color:#444; }
+    .preset-toggle-btn.on { color:#56bf86; border-color:#1d9e75; background:#04342c; }
+    .site-del { background:none; border:none; color:#2a2a2a; font-size:14px; cursor:pointer; padding:0 2px; transition:color .15s; flex-shrink:0; }
     .site-del:hover { color: #e06c75; }
 
-    .empty { font-size: 10px; color: #2a2a2a; text-align: center; padding: 20px 0; }
-
-    @keyframes titlePulse {
-      0%,100% { color: #eee; }
-      50%      { color: #a29de3; }
-    }
+    .empty { font-size:10px; color:#2a2a2a; text-align:center; padding:20px 0; }
+    @keyframes titlePulse { 0%,100%{color:#eee} 50%{color:#a29de3} }
     .title-saved { animation: titlePulse .5s ease; }
   </style>
 </head>
 <body>
   <div class="titlebar">
     <span class="titlebar-title"><span>#</span> css editor</span>
-    <span class="titlebar-ver">v0.2</span>
+    <span class="titlebar-ver">v0.3</span>
+    <!-- <button class="titlebar-icon" id="btn-settings" title="settings">⚙</button> -->
   </div>
 
   <div class="tabs">
     <div class="tab active" data-tab="editor">editor</div>
     <div class="tab" data-tab="presets">presets</div>
     <div class="tab" data-tab="sites">sites</div>
+    <!-- <div class="tab" data-tab="settings">settings</div> -->
   </div>
 
+  <!-- EDITOR -->
   <div class="pane active" id="editor-pane">
     <div class="editor-wrap">
       <div id="line-numbers"><div>1</div></div>
-      <textarea id="css-input" placeholder="/* write your css here... */" spellcheck="false"></textarea>
+      <div class="editor-inner">
+        <div id="css-highlight"></div>
+        <textarea id="css-input" placeholder="/* write your css here... */" spellcheck="false"></textarea>
+      </div>
     </div>
     <div class="btn-row">
-      <button class="btn" id="btn-format">⌥ format</button>
-      <button class="btn" id="btn-save-preset">save as preset ↗</button>
+      <button class="btn" id="btn-format"><span class="btn-icon">⌥</span>format</button>
+      <!-- <button class="btn" id="btn-import-file" title="import .css file"><span class="btn-icon">📂</span>import</button> -->
+      <!-- <button class="btn" id="btn-share"><span class="btn-icon">🔗</span>share</button> -->
+      <button class="btn" id="btn-save-preset">save ↗</button>
     </div>
+    <div class="share-result" id="share-result"></div>
+    <input type="file" id="file-input" accept=".css,text/css" class="import-input">
   </div>
 
+  <!-- PRESETS -->
   <div class="pane" id="presets-pane">
     <div id="presets-content"></div>
   </div>
 
+  <!-- SITES -->
   <div class="pane" id="sites-pane">
     <div class="search-wrap">
       <input class="search" id="sites-search" placeholder="filter sites...">
     </div>
     <div id="sites-content"></div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="pane" id="settings-pane">
+    <div class="settings-group">
+      <div class="settings-label">editor</div>
+      <div class="settings-row">
+        <div><div class="settings-row-label">format on paste</div><div class="settings-row-sub">auto-format when pasting css</div></div>
+        <button class="toggle-sm on" data-setting="formatOnPaste"></button>
+      </div>
+      <div class="settings-row">
+        <div><div class="settings-row-label">format on blur</div><div class="settings-row-sub">auto-format when leaving editor</div></div>
+        <button class="toggle-sm on" data-setting="formatOnBlur"></button>
+      </div>
+      <div class="settings-row">
+        <div><div class="settings-row-label">syntax highlight</div><div class="settings-row-sub">color code in editor</div></div>
+        <button class="toggle-sm on" data-setting="syntaxHL"></button>
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <div class="settings-label">data</div>
+      <div class="settings-row">
+        <div><div class="settings-row-label">export all presets</div><div class="settings-row-sub">download as .json</div></div>
+        <button class="settings-btn" id="btn-export-json">export</button>
+      </div>
+      <div class="settings-row">
+        <div><div class="settings-row-label">import presets</div><div class="settings-row-sub">from .json backup</div></div>
+        <button class="settings-btn" id="btn-import-json">import</button>
+        <input type="file" id="json-input" accept=".json,application/json" class="import-input">
+      </div>
+      <div class="settings-row">
+        <div><div class="settings-row-label">clear all data</div><div class="settings-row-sub">removes all presets and drafts</div></div>
+        <button class="settings-btn danger" id="btn-clear-all">clear</button>
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <div class="settings-label">about</div>
+      <div class="settings-row">
+        <div><div class="settings-row-label">version</div></div>
+        <span style="font-size:10px;color:#333">v0.3</span>
+      </div>
+      <div class="settings-row">
+        <div><div class="settings-row-label">workshop</div><div class="settings-row-sub">find & share presets</div></div>
+        <button class="settings-btn" id="btn-open-workshop">open ↗</button>
+      </div>
+    </div>
   </div>
 
   <script src="popup.js"></script>
