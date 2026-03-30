@@ -35,7 +35,8 @@ A minimal popup-based CSS injector that lets you style any website on the fly. C
 - **Format on Paste/Blur:** CSS is auto-formatted when you paste or leave the editor.
 - **Scroll Memory:** Editor remembers your scroll position per domain.
 - **Delete Presets & Sites:** Remove entries with the × button.
-![waterfox_AziBP1h776](https://github.com/user-attachments/assets/eab8eee2-f015-4f7f-933e-3bbec81c5df2)
+![waterfox_Q415rO2Qup-output](https://github.com/user-attachments/assets/7137ab66-a7e4-4013-9739-2f74a8cd223c)
+
 
 
 
