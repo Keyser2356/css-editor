@@ -5,6 +5,11 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap');
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    /* Hide scrollbars */
+    * { scrollbar-width: none; -ms-overflow-style: none; }
+    *::-webkit-scrollbar { display: none; }
+    
     body {
       width: 209px;
       background: #000;
@@ -271,9 +276,9 @@
 
   <!-- SITES -->
   <div class="pane" id="pane-sites">
-    <input class="search" id="sites-search" placeholder="фильтр...">
+    <input class="search" id="sites-search" placeholder="filter...">
     <div id="sites-list"></div>
-    <button class="add-site-btn" id="btn-add-site">+ добавить сайт</button>
+    <button class="add-site-btn" id="btn-add-site">+ add site</button>
   </div>
 
   <script src="popup.js"></script>

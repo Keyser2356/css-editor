@@ -1,17 +1,13 @@
 {
   "manifest_version": 2,
   "name": "css editor",
-  "version": "0.1",
+  "version": "0.4",
   "description": "Real-time CSS injector with presets",
 
   "browser_specific_settings": {
     "gecko": {
-      "id": "css-editor@keyser2356",
-      "strict_min_version": "79.0",
-      "data_collection_permissions": {
-        "required": ["none"],
-        "optional": []
-      }
+      "id": "css-editor@keyser",
+      "strict_min_version": "79.0"
     }
   },
 
@@ -42,6 +38,11 @@
       "js": ["content/injector.js"],
       "run_at": "document_start"
     }
+  ],
+
+  "web_accessible_resources": [
+    "import.html",
+    "import.js"
   ],
 
   "background": {

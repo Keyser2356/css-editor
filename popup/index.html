@@ -7,235 +7,592 @@
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      width: 360px; background: #000; border-radius: 12px;
-      font-family: 'Fira Code', monospace; font-size: 12px; color: #ccc; overflow: hidden;
-    }
-    .titlebar {
-      height: 38px; background: #0f0f0f; border-bottom: 1px solid #2a2a2a;
-      display: flex; align-items: center; padding: 0 10px; gap: 6px;
-    }
-    .titlebar-title { font-weight: 700; color: #eee; flex: 1; }
-    .titlebar-title span { color: #534ab7; }
-    .titlebar-ver { color: #333; font-size: 11px; }
-    .titlebar-icon {
-      width: 22px; height: 22px; border-radius: 5px;
-      background: #0d0d0d; border: 1px solid #2a2a2a;
-      color: #555; font-size: 12px; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      transition: all .15s; flex-shrink: 0;
-    }
-    .titlebar-icon:hover { border-color: #534ab7; color: #a29de3; }
 
-    .tabs { height: 34px; background: #0a0a0a; border-bottom: 1px solid #2a2a2a; display: flex; }
-    .tab {
-      flex: 1; display: flex; align-items: center; justify-content: center;
-      color: #555; cursor: pointer; font-size: 11px;
-      border-bottom: 2px solid transparent; user-select: none; transition: color .15s, border-color .15s;
+    :root{
+      --bg0:#07070a;
+      --bg1:#0b0b10;
+      --bg2:#0f1018;
+      --card:#0e0f16;
+      --stroke:rgba(255,255,255,.08);
+      --stroke2:rgba(255,255,255,.12);
+      --text:#e7e7ee;
+      --muted:rgba(231,231,238,.55);
+      --faint:rgba(231,231,238,.28);
+      --accent:#6a5cff;
+      --accent2:#9b93ff;
+      --ok:#2ecc71;
+      --danger:#ff5c7a;
+      --shadow: 0 16px 40px rgba(0,0,0,.45);
+      --ring: 0 0 0 3px rgba(106,92,255,.22);
+      --radius:14px;
+      --ease-out: cubic-bezier(.22,.61,.36,1);
     }
-    .tab:hover:not(.active) { color: #888; }
-    .tab.active { color: #eee; border-bottom-color: #534ab7; }
+    body[data-theme="light"]{
+      --bg0:#f6f7fb;
+      --bg1:#ffffff;
+      --bg2:#f3f4ff;
+      --card:#ffffff;
+      --stroke:rgba(18,18,28,.10);
+      --stroke2:rgba(18,18,28,.16);
+      --text:#12121c;
+      --muted:rgba(18,18,28,.62);
+      --faint:rgba(18,18,28,.35);
+      --accent:#4b3bff;
+      --accent2:#6d61ff;
+      --ok:#0f9d58;
+      --danger:#e24362;
+      --shadow: 0 16px 40px rgba(10,12,20,.18);
+      --ring: 0 0 0 3px rgba(75,59,255,.18);
+      --surface: rgba(18,18,28,.035);
+      --surface2: rgba(18,18,28,.06);
+      --codeBg: rgba(18,18,28,.055);
+    }
+
+    html, body { width: 100%; height: 100%; }
+    body {
+      width: 380px;
+      background: radial-gradient(900px 380px at 30% -120px, rgba(106,92,255,.22), transparent 60%),
+        radial-gradient(700px 300px at 90% 0px, rgba(46,204,113,.10), transparent 55%),
+        var(--bg0);
+      border-radius: var(--radius);
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: var(--text);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    body[data-window-mode="detached"] {
+      width: 100%;
+      height: 100%;
+      border-radius: 0;
+      box-shadow: none;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Hide scrollbars */
+    * { scrollbar-width: none; -ms-overflow-style: none; }
+    *::-webkit-scrollbar { display: none; }
+
+    /* SVG icon util */
+    .icon { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .icon svg { display: block; }
+
+    .titlebar {
+      height: 44px;
+      background: linear-gradient(to bottom, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      border-bottom: 1px solid var(--stroke);
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      gap: 8px;
+      animation: fadeSlideDown .35s var(--ease-out);
+    }
+    .titlebar-title { font-weight: 700; color: var(--text); flex: 1; letter-spacing: .1px; }
+    .titlebar-title span { color: var(--accent2); }
+    .titlebar-ver { color: var(--faint); font-size: 11px; }
+    .titlebar-icon {
+      width: 28px; height: 28px; border-radius: 9px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--stroke);
+      color: var(--muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform .16s var(--ease-out), border-color .2s, background .2s, color .2s, box-shadow .2s;
+      flex-shrink: 0;
+      padding: 0;
+    }
+    .titlebar-icon:hover { border-color: var(--stroke2); background: rgba(255,255,255,.07); color: var(--text); box-shadow: 0 0 0 3px rgba(106,92,255,.14); }
+    .titlebar-icon:active { transform: scale(.93) rotate(-8deg); }
+    .titlebar-icon svg { width: 14px; height: 14px; }
+
+    .tabs {
+      height: 40px;
+      background: linear-gradient(to bottom, rgba(255,255,255,.04), rgba(255,255,255,.01));
+      border-bottom: 1px solid var(--stroke);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      padding: 0 8px;
+      gap: 8px;
+      align-items: center;
+      animation: fadeSlideDown .42s var(--ease-out);
+    }
+    .tab {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--faint);
+      cursor: pointer;
+      font-size: 10px;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      height: 28px;
+      letter-spacing: .2px;
+      user-select: none;
+      transition: color .2s, border-color .2s, background .2s, box-shadow .2s, transform .18s var(--ease-out);
+    }
+    .tab:hover:not(.active) { color: var(--text); background: rgba(255,255,255,.05); border-color: var(--stroke); transform: translateY(-1px); }
+    .tab.active {
+      color: var(--text);
+      border-color: rgba(106,92,255,.50);
+      background: rgba(106,92,255,.13);
+      box-shadow: inset 0 0 0 1px rgba(106,92,255,.28);
+    }
+
+    .contextbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--stroke);
+      background: rgba(255,255,255,.02);
+      animation: fadeSlideDown .48s var(--ease-out);
+    }
+    .context-left{ min-width:0; display:flex; flex-direction:column; gap:2px; }
+    .context-kicker{ font-size:9px; color: var(--faint); letter-spacing:.06em; text-transform: uppercase; }
+    .context-domain{ font-size:11px; color: var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .context-actions{ display:flex; align-items:center; gap:6px; flex-shrink:0; }
+    .pill{
+      height: 26px;
+      padding: 0 10px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.04);
+      color: var(--muted);
+      cursor:pointer;
+      font-family: 'Fira Code', monospace;
+      font-size: 9px;
+      display:flex;
+      align-items:center;
+      gap:6px;
+      transition: transform .16s var(--ease-out), border-color .2s, background .2s, color .2s, box-shadow .2s;
+    }
+    .pill:hover{ border-color: var(--stroke2); background: rgba(255,255,255,.07); color: var(--text); box-shadow: 0 0 0 2px rgba(106,92,255,.13); }
+    .pill:active{ transform: scale(.95); }
+    .pill svg{ width: 12px; height: 12px; }
+    .pill.danger:hover{ border-color: rgba(255,92,122,.55); background: rgba(255,92,122,.12); color: var(--danger); }
 
     .pane { display: none; padding: 10px; }
-    .pane.active { display: block; animation: paneIn .15s ease; }
-    @keyframes paneIn { from { opacity:0; transform:translateY(3px); } to { opacity:1; transform:translateY(0); } }
+    .pane.active { display: block; animation: paneIn .26s var(--ease-out); }
+    @keyframes paneIn { from{opacity:0;transform:translateY(3px)} to{opacity:1;transform:translateY(0)} }
+    body[data-window-mode="detached"] .pane.active {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+    }
+    body[data-window-mode="detached"] .contextbar {
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+    body[data-window-mode="detached"] .context-actions {
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      max-width: 100%;
+    }
 
-    /* ── Editor with highlight overlay ── */
-    .editor-wrap {
-      display: flex; width: 100%; height: 260px;
-      background: #0d0d0d; border: 1px solid #2a2a2a; border-radius: 8px;
-      overflow: hidden; transition: border-color .2s, box-shadow .2s; position: relative;
-    }
-    .editor-wrap:focus-within { border-color: #534ab7; box-shadow: 0 0 0 2px rgba(83,74,183,.15); }
-    #line-numbers {
-      width: 32px; min-width: 32px; background: #0a0a0a;
-      border-right: 1px solid #1e1e1e; padding: 8px 0;
-      text-align: right; font-size: 9px; line-height: 1.6; color: #2a2a2a;
-      overflow: hidden; user-select: none; flex-shrink: 0;
-    }
+    /* Editor */
+    .editor-wrap { display: flex; width: 100%; height: 268px; background: rgba(255,255,255,.03); border: 1px solid var(--stroke); border-radius: 12px; overflow: hidden; transition: border-color .24s, box-shadow .24s, background .24s, transform .2s var(--ease-out); animation: floatIn .35s var(--ease-out); }
+    .editor-wrap:focus-within { border-color: rgba(106,92,255,.55); box-shadow: var(--ring); background: rgba(255,255,255,.04); }
+    #line-numbers { width: 34px; min-width: 34px; background: rgba(255,255,255,.03); border-right: 1px solid var(--stroke); padding: 10px 0; text-align: right; font-size: 9px; line-height: 1.65; color: var(--faint); overflow: hidden; user-select: none; flex-shrink: 0; }
     #line-numbers div { padding-right: 6px; }
     .editor-inner { position: relative; flex: 1; overflow: hidden; }
-    /* highlight layer */
-    #css-highlight {
-      position: absolute; inset: 0; padding: 8px;
-      font-family: 'Fira Code', monospace; font-size: 10px; line-height: 1.6;
-      white-space: pre; overflow: hidden; pointer-events: none;
-      word-break: normal; tab-size: 2;
-      /* must match textarea exactly so text aligns */
-      margin: 0; border: none;
-    }
-    /* textarea on top */
-    #css-input {
-      position: absolute; inset: 0; width: 100%; height: 100%;
-      background: transparent; border: none; padding: 8px;
-      font-family: 'Fira Code', monospace; font-size: 10px; line-height: 1.6;
-      color: transparent; caret-color: #c9d1d9;
-      resize: none; outline: none; overflow: auto;
-      white-space: pre; tab-size: 2; z-index: 1;
-      /* selection must be visible through transparent text */
-    }
-    #css-input::selection { background: rgba(83,74,183,.4); color: transparent; }
-    #css-input::-moz-selection { background: rgba(83,74,183,.4); color: transparent; }
-    /* syntax */
-    .hl-sel  { color: #e06c75; }
-    .hl-prop { color: #79b8ff; }
-    .hl-val  { color: #98c379; }
-    .hl-punc { color: #444; }
-    .hl-at   { color: #c678dd; }
-    .hl-com  { color: #3a3a3a; font-style: italic; }
-    .hl-num  { color: #d19a66; }
-    .hl-str  { color: #98c379; }
-    .hl-imp  { color: #e06c75; }
+    #css-highlight { position: absolute; inset: 0; padding: 8px; font-family: 'Fira Code', monospace; font-size: 10px; line-height: 1.6; white-space: pre; overflow: hidden; pointer-events: none; tab-size: 2; margin: 0; border: none; }
+    #css-input { position: absolute; inset: 0; width: 100%; height: 100%; background: transparent; border: none; padding: 8px; font-family: 'Fira Code', monospace; font-size: 10px; line-height: 1.6; color: transparent; caret-color: var(--text); resize: none; outline: none; overflow: auto; white-space: pre; tab-size: 2; z-index: 1; }
+    #css-input::selection { background: rgba(106,92,255,.35); color: transparent; }
+    #css-input::-moz-selection { background: rgba(106,92,255,.35); color: transparent; }
+    .hl-sel { color: #e06c75; } .hl-prop { color: #79b8ff; } .hl-val { color: #98c379; }
+    .hl-punc { color: #444; } .hl-at { color: #c678dd; } .hl-com { color: #3a3a3a; font-style: italic; }
+    .hl-num { color: #d19a66; } .hl-str { color: #98c379; } .hl-imp { color: #e06c75; }
+    /* Arborium custom element theme — same colors, swappable with real Arborium later */
+    a-tg { color: #e06c75; }
+    a-pr { color: #79b8ff; }
+    a-s  { color: #98c379; }
+    a-c  { color: #3a3a3a; font-style: italic; }
+    a-k  { color: #c678dd; }
+    a-n  { color: #d19a66; }
+    a-p  { color: #444; }
+    a-at { color: #e5c07b; }
 
     .btn-row { display: flex; gap: 5px; margin-top: 8px; }
-    .btn {
-      flex: 1; height: 28px; background: #0d0d0d; border: 1px solid #2a2a2a; border-radius: 6px;
-      color: #777; font-family: 'Fira Code', monospace; font-size: 9px;
-      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 3px;
-      transition: border-color .15s, color .15s, transform .1s, background .15s;
+    .btn { flex: 1; height: 30px; background: rgba(255,255,255,.04); border: 1px solid var(--stroke); border-radius: 10px; color: var(--muted); font-family: 'Fira Code', monospace; font-size: 9px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: border-color .2s, color .2s, transform .16s var(--ease-out), background .2s, box-shadow .2s; position: relative; overflow: hidden; }
+    .btn:hover { border-color: var(--stroke2); color: var(--text); background: rgba(255,255,255,.07); }
+    .btn:active { transform: scale(.95); }
+    .btn::after {
+      content:'';
+      position:absolute;
+      top:0; left:-130%;
+      width:60%; height:100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent);
+      transform: skewX(-18deg);
+      transition: left .45s var(--ease-out);
     }
-    .btn:hover { border-color: #534ab7; color: #a29de3; }
-    .btn:active { transform: scale(.96); background: #13103a; }
-    .btn-icon { font-size: 11px; }
-
-    /* ── Settings pane ── */
-    .settings-group { margin-bottom: 16px; }
-    .settings-label { font-size: 9px; color: rgba(102,102,102,.7); margin-bottom: 6px; text-transform: lowercase; }
-    .settings-row {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 7px 0; border-bottom: 1px solid #111;
-    }
-    .settings-row:last-child { border-bottom: none; }
-    .settings-row-label { font-size: 10px; color: #888; }
-    .settings-row-sub { font-size: 9px; color: #444; margin-top: 1px; }
-    .toggle-sm {
-      width: 28px; height: 16px; background: #1e1e1e;
-      border-radius: 8px; border: none; position: relative;
-      cursor: pointer; flex-shrink: 0; transition: background .2s;
-    }
-    .toggle-sm.on { background: #534ab7; }
-    .toggle-sm::after {
-      content: ''; position: absolute; top: 2px; left: 2px;
-      width: 12px; height: 12px; border-radius: 50%; background: #fff;
-      transition: left .2s cubic-bezier(.34,1.56,.64,1);
-    }
-    .toggle-sm.on::after { left: 14px; }
-    .settings-btn {
-      padding: 4px 10px; border-radius: 4px; font-size: 9px;
-      font-family: 'Fira Code', monospace; background: #0d0d0d;
-      border: 1px solid #2a2a2a; color: #555; cursor: pointer;
-      transition: all .15s;
-    }
-    .settings-btn:hover { border-color: #534ab7; color: #a29de3; }
-    .settings-btn.danger:hover { border-color: #e05555; color: #e05555; }
-    .share-result {
-      margin-top: 8px; padding: 6px 8px; background: #0d0d0d;
-      border: 1px solid #2a2a2a; border-radius: 5px;
-      font-size: 9px; color: #56bf86; word-break: break-all; display: none;
-    }
+    .btn:hover::after { left: 150%; }
+    .btn.primary { border-color: rgba(106,92,255,.35); background: rgba(106,92,255,.14); color: var(--text); }
+    .btn.primary:hover { border-color: rgba(106,92,255,.65); background: rgba(106,92,255,.18); box-shadow: 0 0 0 3px rgba(106,92,255,.18); }
+    .btn svg { width: 12px; height: 12px; }
+    .share-result { margin-top: 6px; padding: 6px 8px; background: #0d0d0d; border: 1px solid #2a2a2a; border-radius: 5px; font-size: 9px; color: #56bf86; word-break: break-all; display: none; }
     .share-result.show { display: block; }
-    .import-wrap { margin-top: 6px; }
-    .import-input {
-      display: none;
-    }
-    .import-label {
-      display: flex; align-items: center; justify-content: center;
-      width: 100%; padding: 8px; border: 1px dashed #2a2a2a; border-radius: 6px;
-      font-size: 9px; color: #444; cursor: pointer; transition: all .15s;
-    }
-    .import-label:hover { border-color: #534ab7; color: #a29de3; }
+    .import-input { display: none; }
 
-    /* ── Presets ── */
-    .group-label { font-size: 9px; color: rgba(102,102,102,.7); margin: 10px 0 5px; text-transform: lowercase; }
-    .group-label:first-child { margin-top: 0; }
-    .chips { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 2px; }
-    .chip {
-      height: 22px; padding: 0 8px; border-radius: 11px;
-      border: 1px solid #2a2a2a; background: #0a0a0a; color: #555;
+    /* Settings */
+    .settings-hero {
+      border: 1px solid var(--stroke);
+      background: linear-gradient(135deg, rgba(106,92,255,.16), rgba(106,92,255,.06) 55%, rgba(46,204,113,.06));
+      border-radius: 14px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+    }
+    .settings-hero-title { font-size: 10px; color: #efeff8; text-transform: lowercase; }
+    .settings-hero-sub { margin-top: 3px; font-size: 9px; color: var(--faint); }
+    .settings-grid { display: grid; gap: 10px; }
+    .settings-card {
+      border: 1px solid var(--stroke);
+      background: linear-gradient(to bottom, rgba(255,255,255,.03), rgba(255,255,255,.01));
+      border-radius: 14px;
+      padding: 10px;
+    }
+    .settings-card-title { font-size: 10px; color: #d8d8e8; margin-bottom: 7px; text-transform: lowercase; }
+    .settings-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--stroke); gap: 8px; }
+    .settings-row:last-child { border-bottom: none; padding-bottom: 2px; }
+    .settings-row-label { font-size: 10px; color: #c3c3d1; }
+    .settings-row-sub { font-size: 9px; color: var(--faint); margin-top: 2px; }
+    .toggle-sm { width: 28px; height: 16px; background: #1e1e1e; border-radius: 8px; border: none; position: relative; cursor: pointer; flex-shrink: 0; transition: background .2s; }
+    .toggle-sm.on { background: var(--accent); }
+    .toggle-sm::after { content:''; position:absolute; top:2px; left:2px; width:12px; height:12px; border-radius:50%; background:#fff; transition:left .2s cubic-bezier(.34,1.56,.64,1); }
+    .toggle-sm.on::after { left: 14px; }
+    .settings-btn { padding: 4px 9px; border-radius: 10px; font-size: 9px; font-family: 'Fira Code', monospace; background: rgba(255,255,255,.04); border: 1px solid var(--stroke); color: var(--muted); cursor: pointer; transition: all .2s; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .settings-btn svg { width: 12px; height: 12px; }
+    .settings-btn:hover { border-color: var(--stroke2); color: var(--text); background: rgba(255,255,255,.07); }
+    .settings-btn.danger:hover { border-color: rgba(255,92,122,.55); color: var(--danger); background: rgba(255,92,122,.10); }
+    #settings-pane.active { max-height: 400px; overflow-y: auto; }
+
+    /* Presets / Sites redesigned views */
+    #presets-pane.active, #sites-pane.active { max-height: 400px; overflow-y: auto; }
+    .view-hero {
+      border: 1px solid var(--stroke);
+      background: linear-gradient(135deg, rgba(106,92,255,.16), rgba(106,92,255,.06) 55%, rgba(46,204,113,.06));
+      border-radius: 14px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      animation: fadeScaleIn .26s var(--ease-out);
+    }
+    .view-hero-title { font-size: 10px; color: #efeff8; text-transform: lowercase; }
+    .view-hero-sub { margin-top: 3px; font-size: 9px; color: var(--faint); }
+    .pane-search {
+      margin-bottom: 10px;
+      width: 100%;
+      background: rgba(255,255,255,.03);
+      border: 1px solid var(--stroke);
+      border-radius: 12px;
+      color: var(--text);
+      padding: 8px 10px;
+      font-family: 'Fira Code', monospace;
+      font-size: 10px;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s, background .2s;
+    }
+    .pane-search:focus { border-color: rgba(106,92,255,.55); box-shadow: var(--ring); background: rgba(255,255,255,.05); }
+    .pane-search::placeholder { color: var(--faint); }
+    .preset-group { margin-bottom: 12px; padding: 8px; border: 1px solid var(--stroke); border-radius: 14px; background: rgba(255,255,255,.02); }
+    .preset-group:last-child { margin-bottom: 0; }
+    .preset-group-header {
+      display: grid;
+      grid-template-columns: auto 1fr auto auto;
+      align-items: center;
+      gap: 6px;
+      margin: 0 0 8px;
+    }
+    .preset-group-toggle {
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.03);
+      color: var(--muted);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+    }
+    .preset-group-toggle:hover { border-color: var(--stroke2); color: var(--text); }
+    .preset-group-domain { font-size: 10px; color: #d8d8e8; }
+    .preset-group-count {
+      min-width: 20px;
+      height: 18px;
+      padding: 0 6px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      color: var(--faint);
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.02);
+    }
+    .preset-add-btn {
+      width: 18px; height: 18px; border-radius: 4px;
+      background: transparent; border: 1px dashed #2a2a2a;
+      color: #333; cursor: pointer; display: flex;
+      align-items: center; justify-content: center;
+      transition: color .15s, border-color .15s; padding: 0; flex-shrink: 0;
+    }
+    .preset-add-btn svg { width: 10px; height: 10px; }
+    .preset-add-btn:hover { color: #666; border-color: #444; }
+
+    .preset-card {
+      display: flex; align-items: center; justify-content: space-between;
+      background: linear-gradient(to bottom, rgba(255,255,255,.03), rgba(255,255,255,.01));
+      border: 1px solid var(--stroke);
+      border-radius: 14px;
+      padding: 9px 10px;
+      margin-bottom: 7px;
+      cursor: pointer;
+      transition: border-color .2s, background .2s, transform .16s var(--ease-out), box-shadow .2s;
+      gap: 8px;
+      animation: fadeSlideUp .28s var(--ease-out);
+    }
+    .preset-group.collapsed .preset-card { display: none; }
+    .preset-card:hover { border-color: var(--stroke2); transform: translateY(-1px); }
+    .preset-card.on {
+      background: linear-gradient(to bottom, rgba(106,92,255,.18), rgba(106,92,255,.10));
+      border-color: rgba(106,92,255,.55);
+      box-shadow: 0 0 0 1px rgba(106,92,255,.12);
+    }
+
+    .preset-card-left { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
+    .preset-card-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #2a2a2a; flex-shrink: 0;
+      transition: background .2s, box-shadow .2s;
+    }
+    .preset-card-dot.on { background: var(--accent); box-shadow: 0 0 10px rgba(106,92,255,.45); }
+    .preset-card-info { display: flex; flex-direction: column; min-width: 0; }
+    .preset-card-name { font-size: 10px; color: #d9d9e6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: .15px; }
+    .preset-card.on .preset-card-name { color: #eee; }
+    .preset-card-meta { font-size: 8px; color: var(--faint); margin-top: 1px; }
+
+    .preset-card-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+    .preset-action-btn {
+      width: 20px; height: 20px; border-radius: 4px;
+      background: transparent; border: none;
+      color: #333; cursor: pointer; display: flex;
+      align-items: center; justify-content: center;
+      transition: color .15s, background .15s; padding: 0;
+      opacity: 0;
+    }
+    .preset-card:hover .preset-action-btn { opacity: 1; color: #555; }
+    .preset-card.on:hover .preset-action-btn { opacity: 1; color: #7a74c4; }
+    .preset-action-btn svg { width: 11px; height: 11px; }
+    .preset-action-btn:hover { background: rgba(255,255,255,.08); }
+    .preset-edit:hover  { color: #a29de3 !important; }
+    .preset-share:hover { color: #56bf86 !important; }
+    .preset-del:hover   { color: #e06c75 !important; }
+
+    .preset-toggle-btn {
       font-size: 9px; font-family: 'Fira Code', monospace;
-      cursor: pointer; display: flex; align-items: center;
-      transition: all .15s; white-space: nowrap;
+      padding: 2px 7px; border-radius: 4px;
+      border: 1px solid #222; background: #0d0d0d;
+      cursor: pointer; color: #444;
+      transition: color .15s, border-color .15s, background .15s;
+      flex-shrink: 0;
     }
-    .chip:hover { border-color: #444; color: #999; transform: translateY(-1px); }
-    .chip:active { transform: scale(.95); }
-    .chip.on-global { background: #26215c; border-color: #534ab7; color: #a29de3; }
-    .chip.on-site   { background: #04342c; border-color: #1d9e75; color: #56bf86; }
-    .chip-edit { margin-left: 4px; color: rgba(255,255,255,.1); font-size: 10px; cursor: pointer; transition: color .15s; }
-    .chip:hover .chip-edit { color: rgba(255,255,255,.35); }
-    .chip-edit:hover { color: #a29de3 !important; }
-    .chip-x { margin-left: 3px; color: rgba(255,255,255,.12); font-size: 11px; cursor: pointer; transition: color .15s; }
-    .chip:hover .chip-x { color: rgba(255,255,255,.35); }
-    .chip-x:hover { color: #e06c75 !important; }
-    .chip-add {
-      height: 22px; padding: 0 8px; border-radius: 11px;
-      border: 1px dashed #2a2a2a; background: transparent; color: #333;
-      font-size: 11px; font-family: 'Fira Code', monospace;
-      cursor: pointer; display: flex; align-items: center;
-      transition: color .15s, border-color .15s;
-    }
-    .chip-add:hover { color: #666; border-color: #444; }
-    #presets-pane.active { max-height: 400px; overflow-y: auto; }
+    .preset-toggle-btn:hover { color: #999; border-color: #444; }
+    .preset-toggle-btn.on { color: rgba(46,204,113,.95); border-color: rgba(46,204,113,.35); background: rgba(46,204,113,.10); }
 
-    /* ── Sites ── */
-    #sites-pane.active { max-height: 400px; overflow-y: auto; }
+    /* keep old chip styles in case used elsewhere */
+    .group-label { font-size: 9px; color: rgba(102,102,102,.7); margin: 10px 0 5px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 2px; }
+
+    /* Sites */
     .search-wrap { position: relative; margin-bottom: 8px; }
-    .search-wrap::before { content:'⌕'; position:absolute; left:8px; top:50%; transform:translateY(-50%); color:#444; font-size:13px; pointer-events:none; }
-    .search {
-      width: 100%; background: #0d0d0d; border: 1px solid #222; border-radius: 8px;
-      color: #ccc; padding: 6px 8px 6px 26px;
-      font-family: 'Fira Code', monospace; font-size: 10px; outline: none;
-      transition: border-color .2s, box-shadow .2s;
-    }
-    .search:focus { border-color: #534ab7; box-shadow: 0 0 0 2px rgba(83,74,183,.15); }
-    .search::placeholder { color: #333; }
+    .search-icon { position: absolute; left: 7px; top: 50%; transform: translateY(-50%); color: #444; pointer-events: none; display: flex; }
+    .search-icon svg { width: 14px; height: 14px; }
+    .search { width: 100%; background: rgba(255,255,255,.03); border: 1px solid var(--stroke); border-radius: 12px; color: var(--text); padding: 8px 10px 8px 30px; font-family: 'Fira Code', monospace; font-size: 10px; outline: none; transition: border-color .2s, box-shadow .2s, background .2s; }
+    .search:focus { border-color: rgba(106,92,255,.55); box-shadow: var(--ring); background: rgba(255,255,255,.05); }
+    .search::placeholder { color: var(--faint); }
     .site-card {
-      background: #111; border: 1px solid #1e1e1e;
-      border-radius: 10px; padding: 9px 10px; margin-bottom: 6px;
-      transition: border-color .2s, background .2s, box-shadow .2s;
+      background: linear-gradient(to bottom, rgba(255,255,255,.03), rgba(255,255,255,.01));
+      border: 1px solid var(--stroke);
+      border-radius: 14px;
+      padding: 12px 10px;
+      margin-bottom: 8px;
+      transition: border-color .2s, background .2s, box-shadow .2s, transform .16s var(--ease-out);
+      animation: fadeSlideUp .3s var(--ease-out);
     }
-    .site-card:hover { border-color: #2a2a2a; }
-    .site-card.on { background: #1c1a2e; border-color: #534ab7; box-shadow: 0 0 0 1px rgba(83,74,183,.15); }
-    .site-top { display: flex; align-items: center; gap: 8px; }
-    .favicon { width: 22px; height: 22px; background: #1a1a1a; border-radius: 5px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; }
+    .site-card:hover { border-color: var(--stroke2); transform: translateY(-1px); }
+    .site-card.on {
+      background: linear-gradient(to bottom, rgba(106,92,255,.16), rgba(106,92,255,.08));
+      border-color: rgba(106,92,255,.55);
+      box-shadow: 0 0 0 1px rgba(106,92,255,.12);
+    }
+    .site-top { display: grid; grid-template-columns: auto 1fr auto auto auto; align-items: center; gap: 8px; }
+    .favicon { width: 24px; height: 24px; background: #1a1a1a; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; border:1px solid var(--stroke); }
     .favicon img { width: 14px; height: 14px; }
     .site-info { flex: 1; min-width: 0; }
-    .site-domain { font-size: 11px; color: #ddd; }
-    .site-meta { font-size: 9px; color: #3a3a3a; margin-top: 1px; }
+    .site-domain { font-size: 11px; color: var(--text); letter-spacing:.15px; }
+    .site-meta { font-size: 9px; color: var(--faint); margin-top: 1px; }
     .toggle { width: 28px; height: 16px; background: #1e1e1e; border-radius: 8px; border: none; position: relative; cursor: pointer; flex-shrink: 0; transition: background .2s; }
-    .toggle.on { background: #534ab7; }
+    .toggle.on { background: var(--accent); }
     .toggle::after { content:''; position:absolute; top:2px; left:2px; width:12px; height:12px; border-radius:50%; background:#fff; transition:left .2s cubic-bezier(.34,1.56,.64,1); }
     .toggle.on::after { left: 14px; }
-    .expand-btn { background:none; border:none; color:#333; font-size:9px; font-family:'Fira Code',monospace; cursor:pointer; margin-top:5px; padding:0; transition:color .15s; }
-    .expand-btn:hover { color: #666; }
-    .preset-rows { margin-top:6px; border-top:1px solid #1e1e1e; padding-top:5px; animation:paneIn .12s ease; }
-    .preset-row { display:flex; align-items:center; gap:6px; padding:3px 0; }
-    .preset-dot { width:5px; height:5px; border-radius:50%; background:#534ab7; flex-shrink:0; transition:background .2s; }
-    .preset-dot.off { background: #2a2a2a; }
-    .preset-name { flex:1; font-size:10px; color:#ccc; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .preset-rules { font-size:9px; color:#333; }
-    .preset-toggle-btn { font-size:9px; font-family:'Fira Code',monospace; padding:2px 6px; border-radius:4px; border:1px solid #222; background:#0d0d0d; cursor:pointer; color:#444; transition:color .15s,border-color .15s,background .15s; }
-    .preset-toggle-btn:hover { color:#999; border-color:#444; }
-    .preset-toggle-btn.on { color:#56bf86; border-color:#1d9e75; background:#04342c; }
-    .site-del { background:none; border:none; color:#2a2a2a; font-size:14px; cursor:pointer; padding:0 2px; transition:color .15s; flex-shrink:0; }
-    .site-del:hover { color: #e06c75; }
+    .site-del { background:none; border:none; color: var(--faint); cursor:pointer; padding:0 2px; transition:color .15s; flex-shrink:0; display:flex; align-items:center; }
+    .site-del svg { width: 14px; height: 14px; }
+    .site-del:hover { color: var(--danger); }
+    .disable-all { background:none; border:none; color: var(--muted); font-size:12px; cursor:pointer; padding:0 4px; transition:color .15s; flex-shrink:0; font-family:'Fira Code',monospace; font-weight:bold; }
+    .disable-all:hover { color: var(--danger); }
+    .site-tailwind.on { color: var(--ok); }
+    .expand-btn { background:rgba(255,255,255,.03); border:1px solid var(--stroke); color: var(--muted); font-size:9px; font-family:'Fira Code',monospace; cursor:pointer; margin-top:8px; padding:4px 8px; border-radius:999px; transition:color .15s, border-color .15s, background .15s; display:inline-flex; align-items:center; gap:4px; }
+    .expand-btn svg { width: 10px; height: 10px; }
+    .expand-btn:hover { color: var(--muted); }
+    .preset-rows { margin-top:8px; border-top:1px solid var(--stroke); padding-top:8px; animation:paneIn .12s ease; display:grid; gap:6px; }
+    .preset-row { display:grid; grid-template-columns:auto 1fr auto auto; align-items:center; gap:6px; padding:6px 8px; border:1px solid var(--stroke); border-radius:10px; background:rgba(255,255,255,.02); }
+    .preset-dot { width:5px; height:5px; border-radius:50%; background: var(--accent); flex-shrink:0; }
+    .preset-dot.off { background: var(--faint); }
+    .preset-name { flex:1; font-size:10px; color: var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .preset-rules { font-size:9px; color: var(--faint); }
+    .preset-toggle-btn { font-size:9px; font-family:'Fira Code',monospace; padding:2px 8px; border-radius:999px; border:1px solid var(--stroke); background: rgba(255,255,255,.03); cursor:pointer; color: var(--muted); transition:color .15s,border-color .15s,background .15s, transform .08s; }
+    .preset-toggle-btn:hover { color: var(--text); border-color: var(--stroke2); background: rgba(255,255,255,.06); }
+    .preset-toggle-btn:active { transform: scale(.98); }
+    .preset-toggle-btn.on { color: rgba(46,204,113,.95); border-color: rgba(46,204,113,.35); background: rgba(46,204,113,.10); }
 
-    .empty { font-size:10px; color:#2a2a2a; text-align:center; padding:20px 0; }
+    .empty { font-size:10px; color: var(--faint); text-align:center; padding:20px 0; }
+
+    /* ── Light theme readability fixes ─────────────────────── */
+    body[data-theme="light"] {
+      background:
+        radial-gradient(900px 380px at 30% -120px, rgba(75,59,255,.14), transparent 62%),
+        radial-gradient(700px 300px at 90% 0px, rgba(15,157,88,.09), transparent 58%),
+        var(--bg0);
+    }
+    body[data-theme="light"] .titlebar,
+    body[data-theme="light"] .tabs {
+      background: linear-gradient(to bottom, rgba(18,18,28,.035), rgba(18,18,28,.015));
+    }
+
+    body[data-theme="light"] .view-hero-title,
+    body[data-theme="light"] .settings-hero-title,
+    body[data-theme="light"] .settings-card-title,
+    body[data-theme="light"] .settings-row-label,
+    body[data-theme="light"] .preset-group-domain,
+    body[data-theme="light"] .preset-card-name {
+      color: var(--text);
+    }
+
+    body[data-theme="light"] .share-result {
+      background: var(--codeBg);
+      border-color: var(--stroke2);
+      color: var(--ok);
+    }
+
+    body[data-theme="light"] .toggle-sm { background: rgba(18,18,28,.18); }
+
+    body[data-theme="light"] .preset-add-btn {
+      border-color: rgba(18,18,28,.28);
+      color: rgba(18,18,28,.62);
+    }
+    body[data-theme="light"] .preset-add-btn:hover {
+      border-color: rgba(18,18,28,.40);
+      color: rgba(18,18,28,.80);
+    }
+
+    body[data-theme="light"] .preset-card-dot { background: rgba(18,18,28,.22); }
+    body[data-theme="light"] .preset-card:hover .preset-action-btn { color: rgba(18,18,28,.62); }
+    body[data-theme="light"] .preset-card.on:hover .preset-action-btn { color: rgba(75,59,255,.70); }
+
+    body[data-theme="light"] .preset-toggle-btn {
+      border-color: var(--stroke2);
+      background: var(--surface);
+      color: rgba(18,18,28,.70);
+    }
+    body[data-theme="light"] .preset-toggle-btn:hover {
+      border-color: rgba(18,18,28,.28);
+      background: var(--surface2);
+      color: rgba(18,18,28,.90);
+    }
+
+    body[data-theme="light"] .search-icon { color: rgba(18,18,28,.55); }
+
+    body[data-theme="light"] .hl-punc,
+    body[data-theme="light"] a-p { color: rgba(18,18,28,.55); }
+    body[data-theme="light"] .hl-com,
+    body[data-theme="light"] a-c  { color: rgba(18,18,28,.38); }
+
     @keyframes titlePulse { 0%,100%{color:#eee} 50%{color:#a29de3} }
     .title-saved { animation: titlePulse .5s ease; }
+    body[data-window-mode="detached"] #editor-pane.active {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow: hidden;
+    }
+    body[data-window-mode="detached"] #editor-pane .editor-wrap {
+      flex: 1;
+      height: auto;
+      min-height: 280px;
+    }
+    body[data-window-mode="detached"] .context-domain {
+      max-width: 48vw;
+    }
+
+    @keyframes fadeSlideDown {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeScaleIn {
+      from { opacity: 0; transform: scale(.98); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes floatIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body>
   <div class="titlebar">
     <span class="titlebar-title"><span>#</span> css editor</span>
-    <span class="titlebar-ver">v0.3</span>
-    <!-- <button class="titlebar-icon" id="btn-settings" title="settings">⚙</button> -->
+    <span class="titlebar-ver">v0.4</span>
+    <button class="titlebar-icon" id="btn-settings" title="settings">
+      <!-- cog icon -->
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+    </button>
   </div>
 
   <div class="tabs">
     <div class="tab active" data-tab="editor">editor</div>
     <div class="tab" data-tab="presets">presets</div>
     <div class="tab" data-tab="sites">sites</div>
-    <!-- <div class="tab" data-tab="settings">settings</div> -->
+  </div>
+
+  <div class="contextbar" id="contextbar">
+    <div class="context-left">
+      <div class="context-kicker">current site</div>
+      <div class="context-domain" id="current-domain">—</div>
+    </div>
+    <div class="context-actions">
+      <button class="pill" id="btn-editor-scope" title="switch editor scope">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 0 20"/><path d="M12 2a15.3 15.3 0 0 0 0 20"/></svg>
+        <span id="editor-scope-label">site</span>
+      </button>
+      <button class="pill" id="btn-site-toggle" title="enable/disable styles for this site">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        <span id="site-toggle-label">off</span>
+      </button>
+      <button class="pill danger" id="btn-clear-draft" title="clear draft for this site">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        clear
+      </button>
+    </div>
   </div>
 
   <!-- EDITOR -->
@@ -248,72 +605,104 @@
       </div>
     </div>
     <div class="btn-row">
-      <button class="btn" id="btn-format"><span class="btn-icon">⌥</span>format</button>
-      <!-- <button class="btn" id="btn-import-file" title="import .css file"><span class="btn-icon">📂</span>import</button> -->
-      <!-- <button class="btn" id="btn-share"><span class="btn-icon">🔗</span>share</button> -->
-      <button class="btn" id="btn-save-preset">save ↗</button>
+      <button class="btn" id="btn-format" title="format CSS">
+        <!-- wand icon -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72Z"/><path d="m14 7 3 3"/><path d="M5 6v4"/><path d="M19 14v4"/><path d="M10 2v2"/><path d="M7 8H3"/><path d="M21 16h-4"/><path d="M11 3H9"/></svg>
+        format
+      </button>
+      <button class="btn primary" id="btn-save-preset">
+        <!-- save icon -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        save preset
+      </button>
     </div>
-    <div class="share-result" id="share-result"></div>
-    <input type="file" id="file-input" accept=".css,text/css" class="import-input">
+
   </div>
 
   <!-- PRESETS -->
   <div class="pane" id="presets-pane">
+    <input class="pane-search" id="presets-search" placeholder="search presets by name/domain...">
     <div id="presets-content"></div>
   </div>
 
   <!-- SITES -->
   <div class="pane" id="sites-pane">
     <div class="search-wrap">
+      <span class="search-icon">
+        <!-- magnify icon -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </span>
       <input class="search" id="sites-search" placeholder="filter sites...">
     </div>
     <div id="sites-content"></div>
   </div>
 
-  <!-- SETTINGS -->
+  <!-- SETTINGS — via gear only -->
   <div class="pane" id="settings-pane">
-    <div class="settings-group">
-      <div class="settings-label">editor</div>
-      <div class="settings-row">
-        <div><div class="settings-row-label">format on paste</div><div class="settings-row-sub">auto-format when pasting css</div></div>
-        <button class="toggle-sm on" data-setting="formatOnPaste"></button>
-      </div>
-      <div class="settings-row">
-        <div><div class="settings-row-label">format on blur</div><div class="settings-row-sub">auto-format when leaving editor</div></div>
-        <button class="toggle-sm on" data-setting="formatOnBlur"></button>
-      </div>
-      <div class="settings-row">
-        <div><div class="settings-row-label">syntax highlight</div><div class="settings-row-sub">color code in editor</div></div>
-        <button class="toggle-sm on" data-setting="syntaxHL"></button>
-      </div>
+    <div class="settings-hero">
+      <div class="settings-hero-title">workspace settings</div>
+      <div class="settings-hero-sub">editor behavior, data and tools</div>
     </div>
 
-    <div class="settings-group">
-      <div class="settings-label">data</div>
-      <div class="settings-row">
-        <div><div class="settings-row-label">export all presets</div><div class="settings-row-sub">download as .json</div></div>
-        <button class="settings-btn" id="btn-export-json">export</button>
+    <div class="settings-grid">
+      <div class="settings-card">
+        <div class="settings-card-title">editor</div>
+        <div class="settings-row">
+          <div><div class="settings-row-label">format on paste</div><div class="settings-row-sub">auto-format when pasting css</div></div>
+          <button class="toggle-sm on" data-setting="formatOnPaste"></button>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-row-label">format on blur</div><div class="settings-row-sub">auto-format when leaving editor</div></div>
+          <button class="toggle-sm on" data-setting="formatOnBlur"></button>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-row-label">syntax highlight</div><div class="settings-row-sub">color code in editor</div></div>
+          <button class="toggle-sm on" data-setting="syntaxHL"></button>
+        </div>
       </div>
-      <div class="settings-row">
-        <div><div class="settings-row-label">import presets</div><div class="settings-row-sub">from .json backup</div></div>
-        <button class="settings-btn" id="btn-import-json">import</button>
-        <input type="file" id="json-input" accept=".json,application/json" class="import-input">
-      </div>
-      <div class="settings-row">
-        <div><div class="settings-row-label">clear all data</div><div class="settings-row-sub">removes all presets and drafts</div></div>
-        <button class="settings-btn danger" id="btn-clear-all">clear</button>
-      </div>
-    </div>
 
-    <div class="settings-group">
-      <div class="settings-label">about</div>
-      <div class="settings-row">
-        <div><div class="settings-row-label">version</div></div>
-        <span style="font-size:10px;color:#333">v0.3</span>
+      <div class="settings-card">
+        <div class="settings-card-title">appearance</div>
+        <div class="settings-row">
+          <div><div class="settings-row-label">theme</div><div class="settings-row-sub">system / dark / light</div></div>
+          <button class="settings-btn" id="btn-theme">system</button>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-row-label">open as separate window</div><div class="settings-row-sub">opens full editor window automatically</div></div>
+          <button class="settings-btn" id="btn-open-window">off</button>
+        </div>
       </div>
-      <div class="settings-row">
-        <div><div class="settings-row-label">workshop</div><div class="settings-row-sub">find & share presets</div></div>
-        <button class="settings-btn" id="btn-open-workshop">open ↗</button>
+
+      <div class="settings-card">
+        <div class="settings-card-title">data</div>
+        <div class="settings-row">
+          <div><div class="settings-row-label">anonymous analytics</div><div class="settings-row-sub">opt-in install counter</div></div>
+          <button class="settings-btn" id="btn-analytics">off</button>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-row-label">export all presets</div><div class="settings-row-sub">backup as .json</div></div>
+          <button class="settings-btn" id="btn-export-all">export</button>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-row-label">import all presets</div><div class="settings-row-sub">restore from .json</div></div>
+          <button class="settings-btn" id="btn-import-all">import</button>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-row-label">clear all data</div><div class="settings-row-sub">removes all presets and drafts</div></div>
+          <button class="settings-btn danger" id="btn-clear-all">clear</button>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <div class="settings-card-title">tools</div>
+        <div class="settings-row">
+          <div><div class="settings-row-label">visual mode (beta)</div><div class="settings-row-sub">pick element and get selector</div></div>
+          <button class="settings-btn" id="btn-visual-mode">start</button>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-row-label">version</div></div>
+          <span style="font-size:10px;color:var(--faint)">v0.4</span>
+        </div>
       </div>
     </div>
   </div>

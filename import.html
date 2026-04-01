@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>css editor - import</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg0:#07070a;
+      --bg1:#0b0b10;
+      --stroke:rgba(255,255,255,.10);
+      --stroke2:rgba(255,255,255,.18);
+      --text:#e7e7ee;
+      --muted:rgba(231,231,238,.64);
+      --faint:rgba(231,231,238,.35);
+      --accent:#6a5cff;
+      --ok:#2ecc71;
+      --danger:#ff5c7a;
+      --shadow: 0 24px 60px rgba(0,0,0,.45);
+      --radius:16px;
+    }
+
+    html, body { width: 100%; height: 100%; }
+    body {
+      font-family: 'Fira Code', monospace;
+      background:
+        radial-gradient(900px 380px at 25% -120px, rgba(106,92,255,.24), transparent 60%),
+        radial-gradient(700px 300px at 92% 0px, rgba(46,204,113,.10), transparent 55%),
+        var(--bg0);
+      color: var(--text);
+      padding: 22px;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      width: min(640px, 100%);
+      background: linear-gradient(to bottom, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border: 1px solid var(--stroke);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      animation: importIn .35s cubic-bezier(.22,.61,.36,1);
+    }
+
+    .titlebar {
+      height: 46px;
+      border-bottom: 1px solid var(--stroke);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14px;
+      animation: fadeSlideDown .35s cubic-bezier(.22,.61,.36,1);
+    }
+    .title {
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--text);
+      letter-spacing: .1px;
+    }
+    .title span { color: #9b93ff; }
+    .version {
+      font-size: 11px;
+      color: var(--faint);
+    }
+
+    .content {
+      padding: 16px;
+    }
+
+    h2 {
+      color: var(--text);
+      margin: 0 0 6px 0;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: .2px;
+    }
+    .subtitle {
+      color: var(--muted);
+      font-size: 11px;
+      margin-bottom: 12px;
+      line-height: 1.45;
+    }
+
+    #drop-zone {
+      position: relative;
+      background: rgba(255,255,255,.03);
+      border: 1px dashed var(--stroke2);
+      border-radius: 14px;
+      padding: 24px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .22s, background .22s, transform .16s cubic-bezier(.22,.61,.36,1), box-shadow .22s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      animation: fadeSlideUp .3s cubic-bezier(.22,.61,.36,1);
+    }
+    #drop-zone svg {
+      width: 34px;
+      height: 34px;
+      color: var(--faint);
+    }
+    #drop-zone .dz-title {
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    #drop-zone .dz-sub {
+      color: var(--faint);
+      font-size: 10px;
+    }
+    #drop-zone:hover {
+      border-color: rgba(106,92,255,.60);
+      background: rgba(106,92,255,.08);
+      transform: translateY(-1px);
+      box-shadow: 0 0 0 3px rgba(106,92,255,.12);
+    }
+    #drop-zone.drag-over {
+      border-color: rgba(46,204,113,.70);
+      background: rgba(46,204,113,.12);
+    }
+
+    #drop-zone input[type="file"] {
+      position: absolute;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+      inset: 0;
+    }
+
+    #status {
+      animation: fadeSlideUp .38s cubic-bezier(.22,.61,.36,1);
+      color: var(--muted);
+      font-size: 12px;
+      margin: 12px 0 0;
+      line-height: 1.6;
+      min-height: 58px;
+      padding: 12px;
+      border: 1px solid var(--stroke);
+      border-radius: 12px;
+      background: rgba(255,255,255,.03);
+    }
+    .success { color: var(--ok); }
+    .error { color: var(--danger); }
+
+    #close-btn {
+      width: 100%;
+      height: 34px;
+      margin-top: 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(106,92,255,.35);
+      background: rgba(106,92,255,.14);
+      color: var(--text);
+      font-family: 'Fira Code', monospace;
+      font-size: 11px;
+      cursor: pointer;
+      transition: border-color .2s, background .2s, transform .16s cubic-bezier(.22,.61,.36,1), box-shadow .2s;
+    }
+    #close-btn:hover {
+      border-color: rgba(106,92,255,.62);
+      background: rgba(106,92,255,.18);
+      box-shadow: 0 0 0 3px rgba(106,92,255,.16);
+    }
+    #close-btn:active { transform: scale(.99); }
+
+    @media (max-width: 640px) {
+      body { padding: 12px; }
+      .content { padding: 12px; }
+      .titlebar { padding: 0 10px; }
+    }
+
+    @keyframes fadeSlideDown {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(7px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes importIn {
+      from { opacity: 0; transform: scale(.985); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="titlebar">
+      <div class="title"><span>#</span> css editor</div>
+      <div class="version">import</div>
+    </div>
+    <div class="content">
+      <h2>Import presets</h2>
+      <div class="subtitle" id="subtitle">Processing...</div>
+
+      <div id="drop-zone" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <span class="dz-title">Drop JSON file here</span>
+        <span class="dz-sub">or click to choose</span>
+        <input type="file" id="file-input" accept=".json">
+      </div>
+
+      <div id="status">Loading...</div>
+      <button id="close-btn" style="display: none;">Close tab</button>
+    </div>
+  </div>
+
+  <script src="import.js"></script>
+</body>
+</html>
