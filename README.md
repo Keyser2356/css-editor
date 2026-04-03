@@ -7,7 +7,7 @@
   <p align="center">
     <a href="https://www.mozilla.org/firefox/"><img src="https://img.shields.io/badge/Firefox-%23FF7139.svg?style=for-the-badge&logo=firefox-browser&logoColor=white" alt="Firefox"></a>
     <a href="https://www.google.com/chrome/"><img src="https://img.shields.io/badge/Chromium-%234285F4.svg?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Chromium"></a>
-    <a href="https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions"><img src="https://img.shields.io/badge/WebExtension-MV3-555?style=for-the-badge&logo=googlechrome&logoColor=white" alt="WebExtension MV2"></a>
+    <a href="https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions"><img src="https://img.shields.io/badge/WebExtension-MV2-555?style=for-the-badge&logo=googlechrome&logoColor=white" alt="WebExtension MV2"></a>
     <a href="https://github.com/Keyser2356/css-editor/releases"><img src="https://img.shields.io/github/downloads/Keyser2356/css-editor/total?style=for-the-badge&color=534ab7" alt="Downloads"></a>
   </p>
 </p>
